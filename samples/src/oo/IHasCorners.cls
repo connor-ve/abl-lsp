@@ -1,0 +1,3 @@
+INTERFACE oo.IHasCorners:
+    METHOD PUBLIC INTEGER Corners().
+END INTERFACE.

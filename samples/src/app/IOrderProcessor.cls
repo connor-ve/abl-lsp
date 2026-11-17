@@ -1,0 +1,3 @@
+INTERFACE app.IOrderProcessor:
+    METHOD PUBLIC INTEGER ProcessOrders (INPUT piMax AS INTEGER).
+END INTERFACE.

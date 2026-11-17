@@ -1,0 +1,995 @@
+# ABL built-in functions, system handles and handle attributes/methods.
+#
+# Format:
+#   @functions                          following entries are built-in functions
+#   @handle KIND [system=NAME,NAME]     following entries are attributes/methods of a handle kind;
+#                                       `system=` lists the system handles of that kind
+#   NAME(p AS TYPE, [opt AS TYPE], ...) AS TYPE     a function or method; [..] marks optional
+#                                                   parameters, `...` more of the same
+#   NAME AS TYPE                        an attribute (or a function without parentheses)
+#   HANDLE:KIND as a type               a handle of that kind (used to type chains)
+#   indented lines                      documentation
+#
+# Written from the OpenEdge documentation; correct entries here as you find gaps.
+
+@functions
+ABSOLUTE(value AS DECIMAL) AS DECIMAL
+  Absolute value of a number.
+ADD-INTERVAL(datetime AS DATETIME, amount AS INT64, unit AS CHARACTER) AS DATETIME
+  Adds `amount` units ("years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds") to a DATE, DATETIME or DATETIME-TZ.
+AMBIGUOUS(record AS BUFFER) AS LOGICAL
+  TRUE when the last FIND for the buffer found more than one record.
+ASC(character AS CHARACTER, [target-codepage AS CHARACTER], [source-codepage AS CHARACTER]) AS INTEGER
+  Character code of the first character.
+AVAILABLE(record AS BUFFER) AS LOGICAL
+  TRUE when the buffer holds a record.
+BASE64-DECODE(expression AS LONGCHAR) AS MEMPTR
+  Decodes a Base64 string.
+BASE64-ENCODE(expression AS MEMPTR) AS LONGCHAR
+  Encodes a MEMPTR or RAW value as Base64.
+BOX(expression) AS Progress.Lang.Object
+  Wraps a primitive value or array in an object.
+CAN-DO(id-list AS CHARACTER, [user-id AS CHARACTER]) AS LOGICAL
+  Checks a user ID against a comma-separated permission list (`*`, `!` patterns).
+CAN-FIND(record-phrase) AS LOGICAL
+  TRUE when a record matching the record phrase exists. Reads no record into a buffer.
+CAPS(expression AS CHARACTER) AS CHARACTER
+  Upper-case copy of a string.
+CAST(object-reference, type-name) AS Progress.Lang.Object
+  The object reference typed as `type-name`; raises an error when it is not of that type.
+CHR(code AS INTEGER, [target-codepage AS CHARACTER], [source-codepage AS CHARACTER]) AS CHARACTER
+  Character for a character code.
+CODEPAGE-CONVERT(source AS CHARACTER, [target-codepage AS CHARACTER], [source-codepage AS CHARACTER]) AS CHARACTER
+  Converts a string between code pages.
+COMPARE(string1 AS CHARACTER, relational-operator AS CHARACTER, string2 AS CHARACTER, strength AS CHARACTER, [collation AS CHARACTER]) AS LOGICAL
+  Compares two strings with a collation strength ("RAW", "CASE-SENSITIVE", "CASE-INSENSITIVE", "CAPS").
+CONNECTED(logical-database-name AS CHARACTER) AS LOGICAL
+  TRUE when the database is connected.
+COUNT-OF(break-group) AS INTEGER
+  Number of records in a FOR EACH ... BREAK BY group.
+CURRENT-CHANGED(record AS BUFFER) AS LOGICAL
+  TRUE when the record changed in the database since FIND CURRENT / GET CURRENT read it.
+CURRENT-RESULT-ROW(query-name AS CHARACTER) AS INTEGER
+  Current row number of a query's result list.
+CURRENT-VALUE(sequence-name, [logical-database-name]) AS INT64
+  Current value of a database sequence.
+DATE(value) AS DATE
+  DATE(month, day, year), DATE(string), DATE(datetime) or DATE(integer-days).
+DATETIME(value, [mtime AS INTEGER]) AS DATETIME
+  DATETIME(date, mtime), DATETIME(string) or DATETIME(month, day, year, hours, minutes [, seconds [, milliseconds]]).
+DATETIME-TZ(value, [mtime AS INTEGER], [timezone AS INTEGER]) AS DATETIME-TZ
+  DATETIME-TZ(date [, mtime [, timezone]]), DATETIME-TZ(datetime [, timezone]) or DATETIME-TZ(string).
+DAY(date AS DATE) AS INTEGER
+  Day of the month (1-31).
+DBNAME AS CHARACTER
+  Logical name of the first connected database.
+DECIMAL(expression) AS DECIMAL
+  Converts an expression to DECIMAL.
+DYNAMIC-CAST(object-reference, type-name AS CHARACTER) AS Progress.Lang.Object
+  Like CAST with the type name given as a string at run time.
+DYNAMIC-FUNCTION(function-name AS CHARACTER, [IN procedure-handle], [argument], ...)
+  Calls a user-defined function whose name is known at run time.
+DYNAMIC-INVOKE(class-or-object, method-name AS CHARACTER, [argument], ...)
+  Calls a method whose name is known at run time.
+DYNAMIC-NEW(type-name AS CHARACTER, [argument], ...) AS Progress.Lang.Object
+  Creates an object of a class whose name is known at run time.
+DYNAMIC-PROPERTY(object-reference, property-name AS CHARACTER)
+  Reads a property whose name is known at run time.
+ENCODE(expression AS CHARACTER) AS CHARACTER
+  One-way 16-character hash, traditionally used for passwords.
+ENTRY(element AS INTEGER, list AS CHARACTER, [delimiter AS CHARACTER]) AS CHARACTER
+  The element-th entry of a delimited list (default delimiter ",").
+ETIME([reset AS LOGICAL]) AS INT64
+  Milliseconds since the session started or since ETIME(TRUE).
+EXP(base AS DECIMAL, exponent AS DECIMAL) AS DECIMAL
+  `base` raised to `exponent`.
+FILL(expression AS CHARACTER, repeat-count AS INTEGER) AS CHARACTER
+  The string repeated `repeat-count` times.
+FIRST(break-group) AS LOGICAL
+  TRUE on the first iteration of a FOR EACH ... BREAK BY block.
+FIRST-OF(break-group) AS LOGICAL
+  TRUE on the first record of a BREAK BY group.
+GENERATE-PBE-KEY(password AS CHARACTER, [salt AS RAW]) AS RAW
+  Derives an encryption key from a password.
+GENERATE-UUID AS RAW
+  A new 16-byte universally unique identifier (wrap it in GUID() for text).
+GET-BYTE(source AS MEMPTR, position AS INTEGER) AS INTEGER
+  The byte at a 1-based position.
+GET-CLASS(type-name) AS Progress.Lang.Class
+  The Progress.Lang.Class object for a type.
+GET-SIZE(memptr AS MEMPTR) AS INT64
+  Allocated size of a MEMPTR.
+GET-STRING(source AS MEMPTR, position AS INT64, [num-bytes AS INT64]) AS CHARACTER
+  Reads a null-terminated or fixed-length string from a MEMPTR.
+GUID([uuid AS RAW]) AS CHARACTER
+  Text form of a UUID, or of a new one when no argument is given.
+HEX-DECODE(expression AS CHARACTER) AS RAW
+  Converts a hexadecimal string to RAW.
+HEX-ENCODE(expression AS RAW) AS CHARACTER
+  Converts a value to a hexadecimal string.
+INDEX(source AS CHARACTER, target AS CHARACTER, [starting AS INTEGER]) AS INTEGER
+  Position of the first occurrence of `target` in `source`, 0 when absent.
+INT64(expression) AS INT64
+  Converts an expression to INT64.
+INTEGER(expression) AS INTEGER
+  Converts an expression to INTEGER (rounds decimals).
+INTERVAL(datetime1 AS DATETIME, datetime2 AS DATETIME, unit AS CHARACTER) AS INT64
+  `datetime1 - datetime2` in the given unit.
+ISO-DATE(expression) AS CHARACTER
+  ISO 8601 text of a DATE, DATETIME or DATETIME-TZ.
+LAST(break-group) AS LOGICAL
+  TRUE on the last iteration of a FOR EACH ... BREAK BY block.
+LAST-OF(break-group) AS LOGICAL
+  TRUE on the last record of a BREAK BY group.
+LASTKEY AS INTEGER
+  Key code of the last key pressed.
+LC(expression AS CHARACTER) AS CHARACTER
+  Lower-case copy of a string.
+LDBNAME(n-or-alias) AS CHARACTER
+  Logical name of a connected database by number or alias.
+LEFT-TRIM(expression AS CHARACTER, [trim-chars AS CHARACTER]) AS CHARACTER
+  Removes leading white space or `trim-chars`.
+LENGTH(expression AS CHARACTER, [type AS CHARACTER]) AS INTEGER
+  Length in characters (or "RAW" bytes, "COLUMN" columns).
+LOCKED(record AS BUFFER) AS LOGICAL
+  TRUE when the last FIND ... NO-WAIT failed because the record is locked.
+LOG(expression AS DECIMAL, [base AS DECIMAL]) AS DECIMAL
+  Natural logarithm, or the logarithm to `base`.
+LOGICAL(expression, [format AS CHARACTER]) AS LOGICAL
+  Converts an expression to LOGICAL.
+LOOKUP(expression AS CHARACTER, list AS CHARACTER, [delimiter AS CHARACTER]) AS INTEGER
+  1-based position of `expression` in a delimited list, 0 when absent.
+MAXIMUM(expression, expression, ...)
+  The largest of the arguments.
+MD5-DIGEST(data, [key]) AS RAW
+  MD5 hash of the data.
+MESSAGE-DIGEST(algorithm AS CHARACTER, data, [key]) AS RAW
+  Hash of the data: "MD5", "SHA-1", "SHA-256", "SHA-384" or "SHA-512".
+MINIMUM(expression, expression, ...)
+  The smallest of the arguments.
+MONTH(date AS DATE) AS INTEGER
+  Month number (1-12).
+MTIME([datetime AS DATETIME]) AS INTEGER
+  Milliseconds since midnight.
+NEXT-VALUE(sequence-name, [logical-database-name]) AS INT64
+  Increments a database sequence and returns the new value.
+NORMALIZE(string AS CHARACTER, form AS CHARACTER) AS CHARACTER
+  Unicode normalization ("NFC", "NFD", "NFKC", "NFKD").
+NOW AS DATETIME-TZ
+  Current date and time with the time zone.
+NUM-DBS AS INTEGER
+  Number of connected databases.
+NUM-ENTRIES(list AS CHARACTER, [delimiter AS CHARACTER]) AS INTEGER
+  Number of entries in a delimited list.
+NUM-RESULTS(query-name AS CHARACTER) AS INTEGER
+  Number of rows in a query's result list.
+OPSYS AS CHARACTER
+  Operating system: "WIN32" or "UNIX".
+PDBNAME(n-or-alias) AS CHARACTER
+  Physical name of a connected database.
+PROGRAM-NAME(level AS INTEGER) AS CHARACTER
+  Name of the procedure or routine `level` frames up the call stack (1 is the current one).
+PROPATH AS CHARACTER
+  The current PROPATH.
+PROVERSION AS CHARACTER
+  OpenEdge version, such as "12.8".
+QUERY-OFF-END(query-name AS CHARACTER) AS LOGICAL
+  TRUE when the query is positioned before the first or after the last row.
+QUOTER(expression, [quote-char AS CHARACTER], [null-string AS CHARACTER]) AS CHARACTER
+  The value as a quoted string.
+R-INDEX(source AS CHARACTER, target AS CHARACTER, [starting AS INTEGER]) AS INTEGER
+  Position of the last occurrence of `target` in `source`.
+RANDOM(low AS INTEGER, high AS INTEGER) AS INTEGER
+  Random integer between `low` and `high`.
+RECID(record AS BUFFER) AS RECID
+  RECID of the record in the buffer.
+REPLACE(source AS CHARACTER, from-string AS CHARACTER, to-string AS CHARACTER) AS CHARACTER
+  Replaces every occurrence of `from-string`.
+RETURN-VALUE AS CHARACTER
+  Value of the last RETURN statement executed by a called procedure.
+RIGHT-TRIM(expression AS CHARACTER, [trim-chars AS CHARACTER]) AS CHARACTER
+  Removes trailing white space or `trim-chars`.
+ROUND(expression AS DECIMAL, precision AS INTEGER) AS DECIMAL
+  Rounds to `precision` decimal places.
+ROWID(record AS BUFFER) AS ROWID
+  ROWID of the record in the buffer.
+SEARCH(opsys-file AS CHARACTER) AS CHARACTER
+  Full path of a file found on the PROPATH, or ? when not found.
+SHA1-DIGEST(data, [key]) AS RAW
+  SHA-1 hash of the data.
+SQRT(expression AS DECIMAL) AS DECIMAL
+  Square root.
+STRING(source, [format AS CHARACTER]) AS CHARACTER
+  Converts a value to text, optionally with a display format.
+SUBSTITUTE(base-string AS CHARACTER, [argument], ...) AS CHARACTER
+  Replaces &1 to &9 in `base-string` with the arguments.
+SUBSTRING(source AS CHARACTER, position AS INTEGER, [length AS INTEGER], [type AS CHARACTER]) AS CHARACTER
+  Part of a string starting at a 1-based position.
+SUPER([argument], ...)
+  Calls the same routine in a super procedure or superclass.
+TIME AS INTEGER
+  Seconds since midnight.
+TIMEZONE([datetime-tz AS DATETIME-TZ]) AS INTEGER
+  Time zone offset in minutes.
+TO-ROWID(rowid-string AS CHARACTER) AS ROWID
+  Converts a string such as "0x0000000000000063" to a ROWID.
+TODAY AS DATE
+  Current date.
+TRIM(expression AS CHARACTER, [trim-chars AS CHARACTER]) AS CHARACTER
+  Removes leading and trailing white space or `trim-chars`.
+TRUNCATE(expression AS DECIMAL, decimal-places AS INTEGER) AS DECIMAL
+  Truncates a number to `decimal-places`.
+TYPE-OF(object-reference, type-name) AS LOGICAL
+  TRUE when the object is of the type or a subtype.
+UNBOX(object-reference)
+  The primitive value or array held by a boxed object.
+USERID([logical-database-name AS CHARACTER]) AS CHARACTER
+  User ID connected to the database.
+VALID-HANDLE(handle AS HANDLE) AS LOGICAL
+  TRUE when the handle refers to a valid object.
+VALID-OBJECT(object-reference) AS LOGICAL
+  TRUE when the object reference is valid.
+WEEKDAY(date AS DATE) AS INTEGER
+  Day of the week, 1 (Sunday) to 7 (Saturday).
+YEAR(date AS DATE) AS INTEGER
+  Four-digit year.
+
+@handle SESSION system=SESSION
+APPL-ALERT-BOXES AS LOGICAL
+  Show application messages in alert boxes.
+BATCH-MODE AS LOGICAL
+  TRUE when the session runs in batch mode (-b).
+CLIENT-TYPE AS CHARACTER
+  "4GLCLIENT", "APPSERVER", "MULTI-SESSION-AGENT", "WEBSPEED"...
+CPINTERNAL AS CHARACTER
+  Internal code page (-cpinternal).
+CPSTREAM AS CHARACTER
+  Stream code page (-cpstream).
+CURRENT-REQUEST-INFO AS Progress.Lang.OERequestInfo
+  Information about the current AppServer request.
+DATE-FORMAT AS CHARACTER
+  Date order such as "mdy" or "dmy".
+DEBUG-ALERT AS LOGICAL
+  Adds a Help button with the call stack to error alert boxes.
+DISPLAY-TIMEZONE AS INTEGER
+  Time zone offset used to display DATETIME-TZ values.
+ERROR-STACK-TRACE AS LOGICAL
+  Collect the call stack in error objects (CallStack property).
+FIRST-BUFFER AS HANDLE:BUFFER
+  First dynamic buffer in the session.
+FIRST-DATASET AS HANDLE:DATASET
+  First dynamic dataset in the session.
+FIRST-OBJECT AS Progress.Lang.Object
+  First class instance in the session.
+FIRST-PROCEDURE AS HANDLE:PROCEDURE
+  First persistent procedure in the session.
+FIRST-QUERY AS HANDLE:QUERY
+  First dynamic query in the session.
+FIRST-SERVER AS HANDLE
+  First server handle in the session.
+HANDLE AS HANDLE:SESSION
+  The handle itself.
+ICFPARAMETER AS CHARACTER
+  Value of the -icfparam startup parameter.
+LAST-OBJECT AS Progress.Lang.Object
+  Last class instance in the session.
+LAST-PROCEDURE AS HANDLE:PROCEDURE
+  Last persistent procedure in the session.
+NUMERIC-DECIMAL-POINT AS CHARACTER
+  Decimal point character.
+NUMERIC-FORMAT AS CHARACTER
+  "AMERICAN", "EUROPEAN" or a custom format.
+NUMERIC-SEPARATOR AS CHARACTER
+  Thousands separator character.
+PARAMETER AS CHARACTER
+  Value of the -param startup parameter.
+PRINTER-NAME AS CHARACTER
+  Current printer.
+SERVER-CONNECTION-ID AS CHARACTER
+  Connection ID of the AppServer client.
+STARTUP-PARAMETERS AS CHARACTER
+  All startup parameters.
+SUPER-PROCEDURES AS CHARACTER
+  Handles of the session super procedures, comma-separated.
+SUPPRESS-WARNINGS AS LOGICAL
+  Suppress warning messages.
+SYSTEM-ALERT-BOXES AS LOGICAL
+  Show system messages in alert boxes.
+TEMP-DIRECTORY AS CHARACTER
+  Directory for temporary files (-T).
+TIMEZONE AS INTEGER
+  Session time zone offset in minutes.
+TYPE AS CHARACTER
+  "PSEUDO-WIDGET".
+WINDOW-SYSTEM AS CHARACTER
+  Window system, such as "MS-WINXP" or "TTY".
+YEAR-OFFSET AS INTEGER
+  Start of the 100-year window for two-digit years (-yy).
+ADD-SUPER-PROCEDURE(super-proc AS HANDLE, [search-mode]) AS LOGICAL
+  Makes a procedure a super procedure of the session.
+EXPORT([procedure-list AS CHARACTER]) AS LOGICAL
+  Restricts which remote procedures an AppServer client may run.
+GET-PRINTERS() AS CHARACTER
+  Available printers, comma-separated.
+REMOVE-SUPER-PROCEDURE(super-proc AS HANDLE) AS LOGICAL
+  Removes a session super procedure.
+SET-NUMERIC-FORMAT(separator AS CHARACTER, decimal-point AS CHARACTER) AS LOGICAL
+  Sets the thousands separator and decimal point.
+SET-WAIT-STATE(state AS CHARACTER) AS LOGICAL
+  Shows a wait cursor: "GENERAL", "COMPILER" or "" to reset.
+
+@handle ERROR-STATUS system=ERROR-STATUS
+ERROR AS LOGICAL
+  TRUE when the last statement with NO-ERROR raised an error.
+ERROR-OBJECT-DETAIL AS HANDLE
+  SOAP-fault details of the last error.
+NUM-MESSAGES AS INTEGER
+  Number of messages from the last NO-ERROR statement.
+TYPE AS CHARACTER
+  "PSEUDO-WIDGET".
+GET-MESSAGE(index AS INTEGER) AS CHARACTER
+  Text of the index-th message.
+GET-NUMBER(index AS INTEGER) AS INTEGER
+  Number of the index-th message.
+
+@handle PROCEDURE system=THIS-PROCEDURE,SOURCE-PROCEDURE,TARGET-PROCEDURE
+ASYNC-REQUEST-COUNT AS INTEGER
+  Asynchronous requests still running for this procedure.
+CURRENT-WINDOW AS HANDLE:WIDGET
+  Window used for the procedure's frames.
+FILE-NAME AS CHARACTER
+  Path of the procedure file as it was run.
+HANDLE AS HANDLE:PROCEDURE
+  The handle itself.
+INSTANTIATING-PROCEDURE AS HANDLE:PROCEDURE
+  Procedure that ran this one.
+INTERNAL-ENTRIES AS CHARACTER
+  Internal procedures and functions, comma-separated.
+NAME AS CHARACTER
+  Procedure file name.
+NEXT-SIBLING AS HANDLE:PROCEDURE
+  Next persistent procedure in the session chain.
+PERSISTENT AS LOGICAL
+  TRUE for a persistent procedure.
+PREV-SIBLING AS HANDLE:PROCEDURE
+  Previous persistent procedure in the session chain.
+PRIVATE-DATA AS CHARACTER
+  Free-form text for the application.
+PROXY AS LOGICAL
+  TRUE for a proxy of a remote persistent procedure.
+REMOTE AS LOGICAL
+  TRUE when running on an AppServer for a remote client.
+SERVER AS HANDLE
+  Server handle of a remote procedure.
+SUPER-PROCEDURES AS CHARACTER
+  Handles of its super procedures, comma-separated.
+TYPE AS CHARACTER
+  "PROCEDURE".
+UNIQUE-ID AS INTEGER
+  Unique ID of the procedure instance.
+ADD-SUPER-PROCEDURE(super-proc AS HANDLE, [search-mode]) AS LOGICAL
+  Adds a super procedure.
+GET-SIGNATURE(routine-name AS CHARACTER) AS CHARACTER
+  Signature of an internal procedure or function ("" for the main block).
+REMOVE-SUPER-PROCEDURE(super-proc AS HANDLE) AS LOGICAL
+  Removes a super procedure.
+
+@handle FILE-INFO system=FILE-INFO,FILE-INFORMATION
+FILE-CREATE-DATE AS DATE
+  Creation date.
+FILE-CREATE-TIME AS INTEGER
+  Creation time, seconds since midnight.
+FILE-MOD-DATE AS DATE
+  Last modification date.
+FILE-MOD-TIME AS INTEGER
+  Last modification time, seconds since midnight.
+FILE-NAME AS CHARACTER
+  Set this to the file to examine (relative names are searched on the PROPATH).
+FILE-SIZE AS INT64
+  Size in bytes.
+FILE-TYPE AS CHARACTER
+  Letters: D directory, F file, M member of a library, S special; R readable, W writable, H hidden, L link, P pipe.
+FULL-PATHNAME AS CHARACTER
+  Absolute path, or ? when the file does not exist.
+PATHNAME AS CHARACTER
+  Path as found on the PROPATH.
+
+@handle COMPILER system=COMPILER
+ERROR AS LOGICAL
+  TRUE when the last COMPILE failed.
+ERROR-COLUMN AS INTEGER
+  Column of the first error.
+ERROR-ROW AS INTEGER
+  Line of the first error.
+FILE-NAME AS CHARACTER
+  File of the first error.
+NUM-MESSAGES AS INTEGER
+  Number of messages from the last COMPILE.
+WARNING AS LOGICAL
+  TRUE when the last COMPILE produced warnings.
+GET-COLUMN(n AS INTEGER) AS INTEGER
+  Column of the n-th message.
+GET-ERROR-COLUMN(n AS INTEGER) AS INTEGER
+  Column of the n-th message.
+GET-ERROR-ROW(n AS INTEGER) AS INTEGER
+  Line of the n-th message.
+GET-FILE-NAME(n AS INTEGER) AS CHARACTER
+  File of the n-th message.
+GET-MESSAGE(n AS INTEGER) AS CHARACTER
+  Text of the n-th message.
+GET-MESSAGE-TYPE(n AS INTEGER) AS INTEGER
+  1 for an error, 2 for a warning.
+GET-NUMBER(n AS INTEGER) AS INTEGER
+  Number of the n-th message.
+GET-ROW(n AS INTEGER) AS INTEGER
+  Line of the n-th message.
+
+@handle LOG-MANAGER system=LOG-MANAGER
+ENTRY-TYPES-LIST AS CHARACTER
+  Every log entry type this client supports.
+LOG-ENTRY-TYPES AS CHARACTER
+  Entry types being logged (-logentrytypes).
+LOG-THRESHOLD AS INTEGER
+  Size at which the log rolls over.
+LOGFILE-NAME AS CHARACTER
+  Log file (-clientlog); set it to start logging.
+LOGGING-LEVEL AS INTEGER
+  0 none, 1 errors, 2 basic, 3 verbose, 4 extended.
+NUM-LOG-FILES AS INTEGER
+  Log files kept on rollover.
+CLEAR-LOG() AS LOGICAL
+  Empties the log file.
+CLOSE-LOG() AS LOGICAL
+  Stops logging and closes the file.
+WRITE-MESSAGE(message AS CHARACTER, [subsystem AS CHARACTER]) AS LOGICAL
+  Writes a line to the log.
+
+@handle RCODE-INFO system=RCODE-INFO,RCODE-INFORMATION
+CRC-VALUE AS INTEGER
+  CRC of the r-code.
+FILE-NAME AS CHARACTER
+  Set this to the .r file to examine.
+IS-CLASS AS LOGICAL
+  TRUE for class r-code.
+LANGUAGES AS CHARACTER
+  Translated languages in the r-code.
+MD5-VALUE AS CHARACTER
+  MD5 value of the r-code.
+TABLE-CRC-LIST AS CHARACTER
+  CRCs of the tables it references.
+TABLE-LIST AS CHARACTER
+  Tables it references.
+
+@handle WIDGET system=SELF,FOCUS,CURRENT-WINDOW,ACTIVE-WINDOW,DEFAULT-WINDOW,LAST-EVENT
+BGCOLOR AS INTEGER
+  Background color number.
+CHECKED AS LOGICAL
+  State of a toggle box or menu item.
+COLUMN AS DECIMAL
+  Column position in character units.
+DATA-TYPE AS CHARACTER
+  Data type of a fill-in or field.
+FGCOLOR AS INTEGER
+  Foreground color number.
+FIRST-CHILD AS HANDLE:WIDGET
+  First child widget.
+FONT AS INTEGER
+  Font number.
+FORMAT AS CHARACTER
+  Display format.
+FRAME AS HANDLE:WIDGET
+  Frame that contains the widget.
+HANDLE AS HANDLE:WIDGET
+  The handle itself.
+HEIGHT-CHARS AS DECIMAL
+  Height in character units.
+HIDDEN AS LOGICAL
+  Hidden from view.
+INPUT-VALUE AS CHARACTER
+  Unformatted screen value converted to the field's data type.
+LABEL AS CHARACTER
+  Label text.
+LIST-ITEM-PAIRS AS CHARACTER
+  Label/value pairs of a combo box or selection list.
+LIST-ITEMS AS CHARACTER
+  Items of a combo box or selection list.
+MODIFIED AS LOGICAL
+  The user changed the value.
+NAME AS CHARACTER
+  Widget name.
+NEXT-SIBLING AS HANDLE:WIDGET
+  Next widget in the same parent.
+NUM-SELECTED-ROWS AS INTEGER
+  Selected rows in a browse.
+PARENT AS HANDLE:WIDGET
+  Parent widget.
+PRIVATE-DATA AS CHARACTER
+  Free-form text for the application.
+QUERY AS HANDLE:QUERY
+  Query of a browse.
+READ-ONLY AS LOGICAL
+  The value cannot be changed.
+ROW AS DECIMAL
+  Row position in character units.
+SCREEN-VALUE AS CHARACTER
+  Formatted value shown on screen.
+SENSITIVE AS LOGICAL
+  Enabled for input.
+TITLE AS CHARACTER
+  Title of a window, frame or browse.
+TOOLTIP AS CHARACTER
+  Tooltip text.
+TYPE AS CHARACTER
+  Widget type, such as "FILL-IN" or "BUTTON".
+VISIBLE AS LOGICAL
+  Shown on screen.
+WIDTH-CHARS AS DECIMAL
+  Width in character units.
+WINDOW AS HANDLE:WIDGET
+  Window that contains the widget.
+X AS INTEGER
+  Horizontal position in pixels.
+Y AS INTEGER
+  Vertical position in pixels.
+ADD-FIRST(item AS CHARACTER, [value]) AS LOGICAL
+  Adds an item at the start of a combo box or selection list.
+ADD-LAST(item AS CHARACTER, [value]) AS LOGICAL
+  Adds an item at the end of a combo box or selection list.
+DELETE(item) AS LOGICAL
+  Removes an item from a combo box or selection list.
+FETCH-SELECTED-ROW(n AS INTEGER) AS LOGICAL
+  Reads the n-th selected browse row into its buffers.
+LOAD-IMAGE(file AS CHARACTER) AS LOGICAL
+  Loads an image into a button or image widget.
+LOOKUP(item AS CHARACTER) AS INTEGER
+  Position of an item in a combo box or selection list.
+MOVE-TO-TOP() AS LOGICAL
+  Moves the widget in front of its siblings.
+REFRESH() AS LOGICAL
+  Redisplays the browse rows.
+SELECT-FOCUSED-ROW() AS LOGICAL
+  Selects the browse row that has focus.
+
+@handle BUFFER
+AFTER-BUFFER AS HANDLE:BUFFER
+  The after-table buffer for a before-table buffer.
+AMBIGUOUS AS LOGICAL
+  The last FIND matched more than one record.
+AVAILABLE AS LOGICAL
+  The buffer holds a record.
+BATCH-SIZE AS INTEGER
+  Records per FILL batch.
+BEFORE-BUFFER AS HANDLE:BUFFER
+  Buffer of the before-table.
+CURRENT-CHANGED AS LOGICAL
+  The record changed in the database since it was read.
+DATA-SOURCE AS HANDLE:DATA-SOURCE
+  Data source attached for FILL.
+DATASET AS HANDLE:DATASET
+  Dataset the buffer belongs to.
+DBNAME AS CHARACTER
+  Logical database name, or "PROGRESST" for a temp-table.
+ERROR AS LOGICAL
+  An error was recorded for the row.
+ERROR-STRING AS CHARACTER
+  Error text recorded for the row.
+FILL-MODE AS CHARACTER
+  "APPEND", "EMPTY", "MERGE", "NO-FILL" or "REPLACE".
+HANDLE AS HANDLE:BUFFER
+  The handle itself.
+KEYS AS CHARACTER
+  Unique key fields.
+LOCKED AS LOGICAL
+  The last FIND NO-WAIT failed on a lock.
+NAME AS CHARACTER
+  Buffer name.
+NEW AS LOGICAL
+  The record was created and not yet written.
+NUM-CHILD-RELATIONS AS INTEGER
+  Data-relations where this buffer is the parent.
+NUM-FIELDS AS INTEGER
+  Number of fields.
+ORIGIN-ROWID AS ROWID
+  ROWID of the original row in a change dataset.
+PARENT-RELATION AS HANDLE:DATA-RELATION
+  Data-relation where this buffer is the child.
+PRIVATE-DATA AS CHARACTER
+  Free-form text for the application.
+RECID AS RECID
+  RECID of the current record.
+REJECTED AS LOGICAL
+  The change to the row was rejected.
+ROW-STATE AS INTEGER
+  ROW-UNMODIFIED, ROW-DELETED, ROW-MODIFIED or ROW-CREATED.
+ROWID AS ROWID
+  ROWID of the current record.
+SERIALIZE-NAME AS CHARACTER
+  Name used for JSON and XML.
+TABLE AS CHARACTER
+  Table name.
+TABLE-HANDLE AS HANDLE:TEMP-TABLE
+  Temp-table of the buffer.
+TYPE AS CHARACTER
+  "BUFFER".
+ATTACH-DATA-SOURCE(data-source AS HANDLE, [pairs-list AS CHARACTER], [except-fields AS CHARACTER], [include-fields AS CHARACTER]) AS LOGICAL
+  Attaches a data source for FILL and SAVE-ROW-CHANGES.
+BUFFER-COMPARE(source-buffer AS HANDLE, [mode AS CHARACTER], [except-list AS CHARACTER], [pairs-list AS CHARACTER], [no-lobs AS LOGICAL]) AS LOGICAL
+  Compares with another buffer field by field.
+BUFFER-COPY(source-buffer AS HANDLE, [except-list AS CHARACTER], [pairs-list AS CHARACTER], [no-lobs AS LOGICAL]) AS LOGICAL
+  Copies matching fields from another buffer.
+BUFFER-CREATE() AS LOGICAL
+  Creates a record.
+BUFFER-DELETE() AS LOGICAL
+  Deletes the current record.
+BUFFER-FIELD(field-name-or-index) AS HANDLE:BUFFER-FIELD
+  A field by name or 1-based position.
+BUFFER-RELEASE() AS LOGICAL
+  Releases the record.
+BUFFER-VALIDATE() AS LOGICAL
+  Runs the table's validation.
+DETACH-DATA-SOURCE() AS LOGICAL
+  Detaches the data source.
+DISABLE-LOAD-TRIGGERS(allow-replication AS LOGICAL) AS LOGICAL
+  Disables database triggers for this buffer.
+EMPTY-TEMP-TABLE() AS LOGICAL
+  Deletes every record of the buffer's temp-table.
+FILL() AS LOGICAL
+  Fills the buffer's table from its data source.
+FIND-BY-ROWID(rowid AS ROWID, [lock-mode], [wait-mode]) AS LOGICAL
+  Reads the record with this ROWID.
+FIND-CURRENT([lock-mode], [wait-mode]) AS LOGICAL
+  Re-reads the current record, for example to upgrade the lock.
+FIND-FIRST([predicate AS CHARACTER], [lock-mode], [wait-mode]) AS LOGICAL
+  Reads the first record matching a WHERE string.
+FIND-LAST([predicate AS CHARACTER], [lock-mode], [wait-mode]) AS LOGICAL
+  Reads the last record matching a WHERE string.
+FIND-UNIQUE([predicate AS CHARACTER], [lock-mode], [wait-mode]) AS LOGICAL
+  Reads the only record matching a WHERE string; fails when there are several.
+GET-CHILD-RELATION(index AS INTEGER) AS HANDLE:DATA-RELATION
+  The index-th data-relation where this buffer is the parent.
+INDEX-INFORMATION(index AS INTEGER) AS CHARACTER
+  Description of the index-th index.
+MARK-ROW-STATE(row-state AS INTEGER, [source-buffer AS HANDLE]) AS LOGICAL
+  Sets the row state and creates the before-image.
+READ-JSON(source-type AS CHARACTER, source, [read-mode AS CHARACTER]) AS LOGICAL
+  Loads records from JSON ("FILE", "LONGCHAR", "MEMPTR", "STREAM", "JsonArray"...).
+READ-XML(source-type AS CHARACTER, source, read-mode AS CHARACTER, schema-location AS CHARACTER, override-default-mapping AS LOGICAL, [field-type-mapping AS CHARACTER], [verify-schema-mode AS CHARACTER]) AS LOGICAL
+  Loads records from XML.
+SERIALIZE-ROW(target-format AS CHARACTER, target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [omit-initial-values AS LOGICAL], [omit-outer-object AS LOGICAL]) AS LOGICAL
+  Writes the current record as "JSON" or "XML".
+WRITE-JSON(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [omit-initial-values AS LOGICAL], [omit-outer-object AS LOGICAL], [write-before-image AS LOGICAL]) AS LOGICAL
+  Writes the table as JSON.
+WRITE-XML(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [schema-location AS CHARACTER], [write-xmlschema AS LOGICAL], [min-xmlschema AS LOGICAL]) AS LOGICAL
+  Writes the table as XML.
+
+@handle BUFFER-FIELD
+BUFFER-HANDLE AS HANDLE:BUFFER
+  Buffer the field belongs to.
+BUFFER-VALUE AS ANY
+  Value of the field in the current record; `BUFFER-VALUE(i)` for an extent element.
+CASE-SENSITIVE AS LOGICAL
+  Case-sensitive character field.
+COLUMN-LABEL AS CHARACTER
+  Column label.
+DATA-TYPE AS CHARACTER
+  Data type name, such as "character".
+DECIMALS AS INTEGER
+  Decimal places of a DECIMAL field.
+EXTENT AS INTEGER
+  Array size, 0 when not an array.
+FORMAT AS CHARACTER
+  Display format.
+HANDLE AS HANDLE:BUFFER-FIELD
+  The handle itself.
+HELP AS CHARACTER
+  Help text.
+INITIAL AS CHARACTER
+  Initial value as text.
+KEY AS LOGICAL
+  Part of a unique key.
+LABEL AS CHARACTER
+  Label.
+LITERAL-QUESTION AS LOGICAL
+  "?" in STRING-VALUE is the literal question mark.
+MANDATORY AS LOGICAL
+  The field cannot be unknown.
+NAME AS CHARACTER
+  Field name.
+POSITION AS INTEGER
+  Position in the record.
+SERIALIZE-HIDDEN AS LOGICAL
+  Left out of JSON and XML.
+SERIALIZE-NAME AS CHARACTER
+  Name used for JSON and XML.
+STRING-VALUE AS CHARACTER
+  Formatted value.
+TABLE AS CHARACTER
+  Table the field belongs to.
+TYPE AS CHARACTER
+  "BUFFER-FIELD".
+UNKNOWN AS LOGICAL
+  The value is unknown (?).
+VALIDATE-EXPRESSION AS CHARACTER
+  Validation expression from the schema.
+WIDTH-CHARS AS DECIMAL
+  Display width.
+
+@handle QUERY
+CACHE AS INTEGER
+  Records cached for a NO-LOCK query.
+CURRENT-RESULT-ROW AS INTEGER
+  Row number of the current result.
+FORWARD-ONLY AS LOGICAL
+  The query only moves forward (faster, no result list).
+HANDLE AS HANDLE:QUERY
+  The handle itself.
+INDEX-INFORMATION AS CHARACTER
+  Indexes used, per buffer.
+IS-OPEN AS LOGICAL
+  The query is open.
+NAME AS CHARACTER
+  Query name.
+NUM-BUFFERS AS INTEGER
+  Number of buffers.
+NUM-RESULTS AS INTEGER
+  Rows in the result list.
+PREPARE-STRING AS CHARACTER
+  The predicate passed to QUERY-PREPARE.
+PRIVATE-DATA AS CHARACTER
+  Free-form text for the application.
+QUERY-OFF-END AS LOGICAL
+  Positioned before the first or after the last row.
+SKIP-DELETED-RECORD AS LOGICAL
+  Skip rows deleted after the query opened.
+TYPE AS CHARACTER
+  "QUERY".
+ADD-BUFFER(buffer) AS LOGICAL
+  Adds a buffer to the query.
+CREATE-RESULT-LIST-ENTRY() AS LOGICAL
+  Adds the current buffer rows to the result list.
+DELETE-RESULT-LIST-ENTRY() AS LOGICAL
+  Removes the current row from the result list.
+GET-BUFFER-HANDLE(index-or-name) AS HANDLE:BUFFER
+  A buffer of the query by position or name.
+GET-CURRENT([lock-mode], [wait-mode]) AS LOGICAL
+  Re-reads the current row.
+GET-FIRST([lock-mode], [wait-mode]) AS LOGICAL
+  Moves to the first row.
+GET-LAST([lock-mode], [wait-mode]) AS LOGICAL
+  Moves to the last row.
+GET-NEXT([lock-mode], [wait-mode]) AS LOGICAL
+  Moves to the next row; QUERY-OFF-END is TRUE after the last one.
+GET-PREV([lock-mode], [wait-mode]) AS LOGICAL
+  Moves to the previous row.
+QUERY-CLOSE() AS LOGICAL
+  Closes the query.
+QUERY-OPEN() AS LOGICAL
+  Opens the prepared query.
+QUERY-PREPARE(predicate AS CHARACTER) AS LOGICAL
+  Compiles a query string such as "FOR EACH Customer NO-LOCK WHERE ...".
+REPOSITION-TO-ROW(row AS INTEGER) AS LOGICAL
+  Moves to a row number.
+REPOSITION-TO-ROWID(rowid AS ROWID, [rowid2 AS ROWID], ...) AS LOGICAL
+  Moves to the row with these ROWIDs.
+SET-BUFFERS(buffer, ...) AS LOGICAL
+  Replaces the query's buffers.
+
+@handle TEMP-TABLE
+DEFAULT-BUFFER-HANDLE AS HANDLE:BUFFER
+  Default buffer of the temp-table.
+ERROR AS LOGICAL
+  An error was recorded for the table.
+ERROR-STRING AS CHARACTER
+  Error text recorded for the table.
+HANDLE AS HANDLE:TEMP-TABLE
+  The handle itself.
+HAS-RECORDS AS LOGICAL
+  The table has at least one record.
+NAME AS CHARACTER
+  Temp-table name.
+NAMESPACE-URI AS CHARACTER
+  XML namespace.
+PREPARED AS LOGICAL
+  TEMP-TABLE-PREPARE has run.
+PRIMARY AS CHARACTER
+  Name of the primary index.
+PRIVATE-DATA AS CHARACTER
+  Free-form text for the application.
+SERIALIZE-NAME AS CHARACTER
+  Name used for JSON and XML.
+TRACKING-CHANGES AS LOGICAL
+  Record changes in the before-table.
+TYPE AS CHARACTER
+  "TEMP-TABLE".
+UNDO AS LOGICAL
+  Changes are undone with the transaction (FALSE for NO-UNDO).
+ADD-FIELDS-FROM(source, [except-list AS CHARACTER]) AS LOGICAL
+  Adds the fields of a table or buffer.
+ADD-INDEX-FIELD(index-name AS CHARACTER, field-name AS CHARACTER, [mode AS CHARACTER]) AS LOGICAL
+  Adds a field to an index ("asc" or "desc").
+ADD-LIKE-FIELD(field-name AS CHARACTER, source-field) AS LOGICAL
+  Adds a field like an existing one.
+ADD-LIKE-INDEX(index-name AS CHARACTER, source-index AS CHARACTER, source-table) AS LOGICAL
+  Adds an index like one of another table.
+ADD-NEW-FIELD(field-name AS CHARACTER, datatype AS CHARACTER, [extent AS INTEGER], [format AS CHARACTER], [initial], [label AS CHARACTER], [column-label AS CHARACTER]) AS LOGICAL
+  Adds a field.
+ADD-NEW-INDEX(index-name AS CHARACTER, [unique AS LOGICAL], [primary AS LOGICAL], [word AS LOGICAL]) AS LOGICAL
+  Adds an index; add its fields with ADD-INDEX-FIELD.
+CLEAR() AS LOGICAL
+  Removes every field and index so the table can be defined again.
+COPY-TEMP-TABLE(source AS HANDLE, [append AS LOGICAL], [replace AS LOGICAL], [loose-copy AS LOGICAL], [name-prefix AS CHARACTER]) AS LOGICAL
+  Copies definition and records from another temp-table.
+CREATE-LIKE(source, [index-name AS CHARACTER]) AS LOGICAL
+  Copies the fields and indexes of a table.
+READ-JSON(source-type AS CHARACTER, source, [read-mode AS CHARACTER]) AS LOGICAL
+  Loads records from JSON.
+READ-XML(source-type AS CHARACTER, source, read-mode AS CHARACTER, schema-location AS CHARACTER, override-default-mapping AS LOGICAL) AS LOGICAL
+  Loads records from XML.
+TEMP-TABLE-PREPARE(table-name AS CHARACTER, [before-table AS LOGICAL]) AS LOGICAL
+  Finishes a dynamic temp-table definition.
+WRITE-JSON(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [omit-initial-values AS LOGICAL], [omit-outer-object AS LOGICAL], [write-before-image AS LOGICAL]) AS LOGICAL
+  Writes the records as JSON.
+WRITE-XML(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [schema-location AS CHARACTER], [write-xmlschema AS LOGICAL], [min-xmlschema AS LOGICAL]) AS LOGICAL
+  Writes the records as XML.
+WRITE-XMLSCHEMA(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [min-xmlschema AS LOGICAL]) AS LOGICAL
+  Writes the XML schema of the table.
+
+@handle DATASET
+ERROR AS LOGICAL
+  An error was recorded in the dataset.
+HANDLE AS HANDLE:DATASET
+  The handle itself.
+NAME AS CHARACTER
+  Dataset name.
+NUM-BUFFERS AS INTEGER
+  Number of member buffers.
+NUM-RELATIONS AS INTEGER
+  Number of data-relations.
+NUM-TOP-BUFFERS AS INTEGER
+  Buffers that are not the child of a relation.
+PRIVATE-DATA AS CHARACTER
+  Free-form text for the application.
+REJECTED AS LOGICAL
+  A change in the dataset was rejected.
+RELATIONS-ACTIVE AS LOGICAL
+  Data-relations are active.
+SERIALIZE-NAME AS CHARACTER
+  Name used for JSON and XML.
+TYPE AS CHARACTER
+  "DATASET".
+ACCEPT-CHANGES() AS LOGICAL
+  Accepts every change and empties the before-tables.
+ADD-BUFFER(buffer) AS LOGICAL
+  Adds a member buffer.
+ADD-RELATION(parent-buffer AS HANDLE, child-buffer AS HANDLE, [pairs-list AS CHARACTER], [reposition AS LOGICAL], [nested AS LOGICAL], [active AS LOGICAL], [recursive AS LOGICAL], [foreign-key-hidden AS LOGICAL]) AS HANDLE:DATA-RELATION
+  Adds a data-relation; `pairs-list` is "parentField,childField,...".
+COPY-DATASET(source AS HANDLE, [append AS LOGICAL], [replace AS LOGICAL], [loose-copy AS LOGICAL], [pairs-list AS CHARACTER], [current-only AS LOGICAL], [name-prefix AS CHARACTER]) AS LOGICAL
+  Copies definition and records from another dataset.
+CREATE-LIKE(source, [name-prefix AS CHARACTER]) AS LOGICAL
+  Copies the definition of another dataset.
+EMPTY-DATASET() AS LOGICAL
+  Empties every member table.
+FILL() AS LOGICAL
+  Fills the dataset from its data sources.
+GET-BUFFER-HANDLE(index-or-name) AS HANDLE:BUFFER
+  A member buffer by position or name.
+GET-CHANGES(source AS HANDLE, [get-parent-mode AS LOGICAL]) AS LOGICAL
+  Loads the changed rows of another dataset.
+GET-RELATION(index-or-name) AS HANDLE:DATA-RELATION
+  A data-relation by position or name.
+GET-TOP-BUFFER(index AS INTEGER) AS HANDLE:BUFFER
+  The index-th top-level buffer.
+MERGE-CHANGES(original AS HANDLE, [copy-all AS LOGICAL]) AS LOGICAL
+  Merges a change dataset back into the original.
+READ-JSON(source-type AS CHARACTER, source, [read-mode AS CHARACTER]) AS LOGICAL
+  Loads the dataset from JSON.
+READ-XML(source-type AS CHARACTER, source, read-mode AS CHARACTER, schema-location AS CHARACTER, override-default-mapping AS LOGICAL) AS LOGICAL
+  Loads the dataset from XML.
+REJECT-CHANGES() AS LOGICAL
+  Undoes every change using the before-tables.
+SET-BUFFERS(buffer, ...) AS LOGICAL
+  Replaces the member buffers.
+WRITE-JSON(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [omit-initial-values AS LOGICAL], [omit-outer-object AS LOGICAL], [write-before-image AS LOGICAL]) AS LOGICAL
+  Writes the dataset as JSON.
+WRITE-XML(target-type AS CHARACTER, target, [formatted AS LOGICAL], [encoding AS CHARACTER], [schema-location AS CHARACTER], [write-xmlschema AS LOGICAL], [min-xmlschema AS LOGICAL], [write-before-image AS LOGICAL]) AS LOGICAL
+  Writes the dataset as XML.
+
+@handle DATA-RELATION
+ACTIVE AS LOGICAL
+  The relation is used for FILL and navigation.
+CHILD-BUFFER AS HANDLE:BUFFER
+  Child buffer.
+FOREIGN-KEY-HIDDEN AS LOGICAL
+  Child key fields are left out of nested JSON and XML.
+HANDLE AS HANDLE:DATA-RELATION
+  The handle itself.
+NAME AS CHARACTER
+  Relation name.
+NESTED AS LOGICAL
+  Child rows are nested inside the parent in JSON and XML.
+PARENT-BUFFER AS HANDLE:BUFFER
+  Parent buffer.
+QUERY AS HANDLE:QUERY
+  Query over the child rows of the current parent.
+RECURSIVE AS LOGICAL
+  The relation is recursive.
+RELATION-FIELDS AS CHARACTER
+  "parentField,childField,..." pairs.
+REPOSITION AS LOGICAL
+  REPOSITION relation (the child is read by its own query).
+WHERE-STRING AS CHARACTER
+  Join predicate of the child query.
+
+@handle DATA-SOURCE
+FILL-WHERE-STRING AS CHARACTER
+  WHERE clause used by FILL.
+HANDLE AS HANDLE:DATA-SOURCE
+  The handle itself.
+NAME AS CHARACTER
+  Data-source name.
+NUM-SOURCE-BUFFERS AS INTEGER
+  Number of source buffers.
+PREFER-DATASET AS LOGICAL
+  Keep the dataset value when SAVE-ROW-CHANGES finds a conflict.
+QUERY AS HANDLE:QUERY
+  Query that reads the source.
+SAVE-WHERE-STRING AS CHARACTER
+  WHERE clause used by SAVE-ROW-CHANGES.
+ADD-SOURCE-BUFFER(buffer AS HANDLE, keys AS CHARACTER) AS LOGICAL
+  Adds a source buffer with its key fields.
+GET-SOURCE-BUFFER(index AS INTEGER) AS HANDLE:BUFFER
+  The index-th source buffer.
+
+@handle X-DOCUMENT
+ENCODING AS CHARACTER
+  Encoding of the document.
+HANDLE AS HANDLE:X-DOCUMENT
+  The handle itself.
+NUM-CHILDREN AS INTEGER
+  Number of child nodes.
+APPEND-CHILD(node AS HANDLE) AS LOGICAL
+  Appends a node.
+CREATE-NODE(node AS HANDLE, name AS CHARACTER, type AS CHARACTER) AS LOGICAL
+  Creates a node ("ELEMENT", "TEXT", "ATTRIBUTE"...).
+GET-DOCUMENT-ELEMENT(node AS HANDLE) AS LOGICAL
+  Points `node` at the root element.
+LOAD(source-type AS CHARACTER, source, validate AS LOGICAL) AS LOGICAL
+  Parses XML ("FILE", "LONGCHAR", "MEMPTR").
+SAVE(target-type AS CHARACTER, target) AS LOGICAL
+  Writes the document.
+
+@handle X-NODEREF
+ATTRIBUTE-NAMES AS CHARACTER
+  Attribute names, comma-separated.
+HANDLE AS HANDLE:X-NODEREF
+  The handle itself.
+NAME AS CHARACTER
+  Node name.
+NODE-VALUE AS CHARACTER
+  Text value of the node.
+NUM-CHILDREN AS INTEGER
+  Number of child nodes.
+SUBTYPE AS CHARACTER
+  Node type, such as "ELEMENT" or "TEXT".
+APPEND-CHILD(node AS HANDLE) AS LOGICAL
+  Appends a child node.
+GET-ATTRIBUTE(name AS CHARACTER) AS CHARACTER
+  Value of an attribute.
+GET-CHILD(node AS HANDLE, index AS INTEGER) AS LOGICAL
+  Points `node` at the index-th child.
+GET-PARENT(node AS HANDLE) AS LOGICAL
+  Points `node` at the parent.
+SET-ATTRIBUTE(name AS CHARACTER, value AS CHARACTER) AS LOGICAL
+  Sets an attribute.
+
+@handle SERVER
+CONNECTED() AS LOGICAL
+  TRUE while connected to an AppServer.
+CONNECT([connection-parameters AS CHARACTER], [userid AS CHARACTER], [password AS CHARACTER], [app-server-info AS CHARACTER]) AS LOGICAL
+  Connects to an AppServer or PAS for OE.
+DISCONNECT() AS LOGICAL
+  Disconnects.
+HANDLE AS HANDLE:SERVER
+  The handle itself.
+NAME AS CHARACTER
+  Server name.

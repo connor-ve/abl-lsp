@@ -1,0 +1,22 @@
+[package]
+name = "abl-lsp"
+version = "0.7.0"
+edition = "2021"
+description = "A language server for OpenEdge ABL"
+authors = ["Connor Van Etten"]
+repository = "https://github.com/connor-ve/abl-lsp"
+readme = "../README.md"
+keywords = ["openedge", "abl", "progress", "lsp", "language-server"]
+categories = ["development-tools"]
+license = "MIT"
+
+[dependencies]
+serde_json = "1"
+tokio = { version = "1", features = ["io-std", "macros", "rt-multi-thread"] }
+tower-lsp = "0.20"
+walkdir = "2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

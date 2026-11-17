@@ -1,0 +1,29 @@
+&ANALYZE-SUSPEND _VERSION-NUMBER UIB_v9r12 GUI
+&ANALYZE-RESUME
+&Scoped-define WINDOW-NAME C-Win
+/* ***************************  Definitions  ************************** */
+DEFINE VARIABLE C-Win AS WIDGET-HANDLE NO-UNDO.
+DEFINE BUTTON btnOk LABEL "OK" SIZE 15 BY 1.14.
+DEFINE FRAME DEFAULT-FRAME btnOk AT ROW 2 COL 3 WITH SIDE-LABELS SIZE 40 BY 5.
+
+&IF DEFINED(EXCLUDE-InitializeWindow) = 0 &THEN
+PROCEDURE InitializeWindow:
+    VIEW FRAME DEFAULT-FRAME.
+END PROCEDURE.
+&ELSE
+PROCEDURE InitializeWindow:
+    /* Inactive branch: the parser ignores it, so this unclosed DO is not an error. */
+    DO:
+END PROCEDURE.
+&ENDIF
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnOk C-Win
+ON CHOOSE OF btnOk IN FRAME DEFAULT-FRAME
+DO:
+    MESSAGE "Clicked" VIEW-AS ALERT-BOX INFORMATION.
+END.
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+RUN InitializeWindow.
+WAIT-FOR CLOSE OF THIS-PROCEDURE.

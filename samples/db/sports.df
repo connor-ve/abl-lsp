@@ -1,0 +1,70 @@
+ADD TABLE "Customer"
+  AREA "Schema Area"
+  LABEL "Customer"
+  DESCRIPTION "Customer master record"
+  DUMP-NAME "customer"
+
+ADD FIELD "CustNum" OF "Customer" AS integer
+  FORMAT ">>>>9"
+  INITIAL "0"
+  LABEL "Cust Num"
+  POSITION 2
+  ORDER 10
+
+ADD FIELD "Name" OF "Customer" AS character
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 3
+  ORDER 20
+
+ADD FIELD "City" OF "Customer" AS character
+  FORMAT "x(25)"
+  INITIAL ""
+  LABEL "City"
+  POSITION 4
+  ORDER 30
+
+ADD FIELD "Balance" OF "Customer" AS decimal
+  DESCRIPTION "Outstanding balance"
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Balance"
+  POSITION 5
+  DECIMALS 2
+  ORDER 40
+
+ADD INDEX "CustNum" ON "Customer"
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CustNum" ASCENDING
+
+ADD TABLE "Order"
+  AREA "Schema Area"
+  LABEL "Order"
+  DUMP-NAME "order"
+
+ADD FIELD "OrderNum" OF "Order" AS integer
+  FORMAT "zzzzzzzzz9"
+  LABEL "Order Num"
+  POSITION 2
+  ORDER 10
+
+ADD FIELD "CustNum" OF "Order" AS integer
+  FORMAT ">>>>9"
+  LABEL "Cust Num"
+  POSITION 3
+  ORDER 20
+
+ADD FIELD "OrderDate" OF "Order" AS date
+  FORMAT "99/99/99"
+  LABEL "Ordered"
+  POSITION 4
+  ORDER 30
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000001234

@@ -1,0 +1,266 @@
+{
+  "name": "abl-lsp",
+  "displayName": "ABL Language Server",
+  "description": "OpenEdge ABL outline, go-to-definition, hover, completion, preprocessor, built-in docs, formatting, lint and class checks.",
+  "version": "0.7.0",
+  "publisher": "connor-ve",
+  "author": "Connor Van Etten",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/connor-ve/abl-lsp"
+  },
+  "bugs": "https://github.com/connor-ve/abl-lsp/issues",
+  "homepage": "https://github.com/connor-ve/abl-lsp#readme",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "abl",
+        "aliases": [
+          "OpenEdge ABL",
+          "abl"
+        ],
+        "extensions": [
+          ".p",
+          ".w",
+          ".i",
+          ".cls",
+          ".t"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "abl.restartServer",
+        "title": "ABL: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "ABL",
+      "properties": {
+        "abl.propath": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "PROPATH used to resolve include files, `RUN` targets and classes. An array of folders or a `;`-separated string. Relative entries are resolved against the first workspace folder. Empty means the workspace folders."
+        },
+        "abl.schema": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Database schema dumps (`.df` files) used for table and field navigation, hover and completion. The file name is the logical database name (`sports2000.df` → `sports2000.customer`). Empty means every `.df` file in the workspace."
+        },
+        "abl.preprocessor": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "markdownDescription": "Preprocessor names defined before every file, as if by `&GLOBAL-DEFINE`, for example compile-time flags: `{ \"MY-FLAG\": \"yes\" }`. Used for `&IF DEFINED(...)` and `{&NAME}`."
+        },
+        "abl.format.keywordCase": {
+          "type": "string",
+          "enum": [
+            "preserve",
+            "upper",
+            "lower"
+          ],
+          "default": "preserve",
+          "markdownDescription": "Keyword case applied by Format Document. `preserve` leaves keywords as written."
+        },
+        "abl.lint": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "Lint rules and their level: `off`, `hint`, `info`, `warning` or `error`. Suppress one finding with `/* lint-ignore */` or `/* lint-ignore rule-name */` on the same line or the line above.",
+          "properties": {
+            "unused-parameter": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "A parameter that is never used in its procedure, function or method. Skipped for OVERRIDE and interface methods, EXTERNAL procedures and prototypes."
+            },
+            "unused-variable": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "A variable that is never used. Skipped for SHARED variables, CATCH variables, non-private class members and include files."
+            },
+            "missing-no-undo": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "DEFINE VARIABLE / PARAMETER / TEMP-TABLE / PROPERTY without NO-UNDO. Quick fix: Add NO-UNDO."
+            },
+            "find-without-no-error": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "FIND without NO-ERROR (FIND CURRENT is skipped). Quick fix: Add NO-ERROR."
+            },
+            "unused-buffer": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "A DEFINE BUFFER that is never used. Skipped for SHARED buffers, non-private class members and include files."
+            },
+            "for-each-without-lock": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "FOR EACH/FIRST/LAST on a database table without NO-LOCK, SHARE-LOCK or EXCLUSIVE-LOCK (defaults to SHARE-LOCK). Temp-tables are skipped. Quick fix: Add NO-LOCK."
+            },
+            "find-without-lock": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "warning",
+              "description": "FIND on a database table without a lock option (defaults to SHARE-LOCK). Temp-tables and FIND CURRENT are skipped. Quick fix: Add NO-LOCK."
+            },
+            "keyword-abbreviation": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "hint",
+              "description": "Abbreviated keywords (DEF VAR, DISP, AS CHAR). Quick fix: expand to the full keyword, keeping your case."
+            },
+            "missing-implementation": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "error",
+              "description": "A concrete class that does not implement every interface method/property/event or inherited ABSTRACT member. Skipped when a supertype cannot be found."
+            },
+            "missing-override": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "error",
+              "description": "A method with the same name and parameter count as a superclass method, without OVERRIDE. Quick fix: Add OVERRIDE."
+            },
+            "override-without-base": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "info",
+                "warning",
+                "error"
+              ],
+              "default": "error",
+              "description": "A method marked OVERRIDE when no superclass has a method with that name and parameter count."
+            }
+          },
+          "additionalProperties": false
+        },
+        "abl.diagnostics.unresolvedIncludes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn when an include file cannot be found on the PROPATH."
+        },
+        "abl.serverPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to a custom abl-lsp executable. Leave empty to use the bundled server."
+        },
+        "abl.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Log LSP traffic to the 'ABL Language Server' output channel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.2.1"
+  }
+}

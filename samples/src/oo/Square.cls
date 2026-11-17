@@ -1,0 +1,34 @@
+USING oo.*.
+
+CLASS oo.Square INHERITS Shape IMPLEMENTS IHasCorners:
+    DEFINE PUBLIC PROPERTY Side AS DECIMAL NO-UNDO GET. SET.
+    DEFINE PUBLIC STATIC PROPERTY Unit AS oo.Square NO-UNDO GET. SET.
+
+    CONSTRUCTOR PUBLIC Square():
+    END CONSTRUCTOR.
+
+    CONSTRUCTOR PUBLIC Square(INPUT pSide AS DECIMAL):
+        Side = pSide.
+    END CONSTRUCTOR.
+
+    METHOD PUBLIC OVERRIDE DECIMAL Area():
+        RETURN Side * Side.
+    END METHOD.
+
+    METHOD PUBLIC INTEGER Corners():
+        RETURN 4.
+    END METHOD.
+
+    METHOD PUBLIC oo.Square Grow(INPUT pBy AS DECIMAL):
+        Side = Side + pBy.
+        RETURN THIS-OBJECT.
+    END METHOD.
+
+    METHOD PUBLIC STATIC oo.Square Make(INPUT pSide AS DECIMAL):
+        RETURN NEW oo.Square(pSide).
+    END METHOD.
+
+    METHOD PUBLIC OVERRIDE CHARACTER ToString():
+        RETURN "Square " + STRING(Side).
+    END METHOD.
+END CLASS.
