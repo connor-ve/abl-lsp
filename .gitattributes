@@ -1,0 +1,4 @@
+# Check out with LF everywhere (including Windows CI), so tests see the same text as locally.
+* text=auto eol=lf
+*.gif binary
+*.png binary
