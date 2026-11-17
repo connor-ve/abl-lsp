@@ -7,7 +7,7 @@ A language server for Progress OpenEdge ABL, written in Rust, with a VS Code ext
 
 ABL has very little modern editor tooling. abl-lsp gives it what other languages take for granted: go-to-definition across files, PROPATH and classes, hover docs, completion, rename, a formatter, and lint rules with quick fixes. It works from source alone and needs no OpenEdge install.
 
-<!-- Add a screenshot or GIF here, e.g. ![abl-lsp in VS Code](docs/demo.gif) -->
+![Syntax errors in a broken ABL file, flagged as you type](docs/demo-broken.gif)
 
 ## Why this matters with coding agents
 
@@ -39,6 +39,8 @@ code --install-extension abl-lsp-0.7.0.vsix
 Open any folder of `.p`, `.w`, `.i` or `.cls` files. The `samples` folder is a good place to start.
 
 ## Features
+
+![Unused variable and parameter warnings](docs/demo-unused.gif)
 
 | Feature | What it does |
 |---|---|
