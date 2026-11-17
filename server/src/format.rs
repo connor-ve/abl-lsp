@@ -321,7 +321,7 @@ mod tests {
                 )
             })
             .collect();
-        edits.sort_by(|x, y| y.0.cmp(&x.0));
+        edits.sort_by_key(|x| std::cmp::Reverse(x.0));
         let mut out = src.to_string();
         for (s, e, t) in edits {
             out.replace_range(s..e, &t);

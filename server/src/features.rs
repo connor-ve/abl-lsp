@@ -516,7 +516,7 @@ pub fn record_tables(ana: &Analysis, off: usize) -> Vec<String> {
             (start <= off && off <= *end).then_some((start, st))
         })
         .collect();
-    enclosing.sort_by(|a, b| b.0.cmp(&a.0));
+    enclosing.sort_by_key(|a| std::cmp::Reverse(a.0));
     for (_, st) in enclosing {
         for (_, name) in phrases(st) {
             add(&name, &mut out);

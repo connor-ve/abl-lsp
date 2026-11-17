@@ -267,7 +267,7 @@ fn parse(text: &str) -> Reference {
         }
     }
     // System handles describe themselves with their kind's purpose.
-    for (_, (k, e)) in r.system.iter_mut() {
+    for (k, e) in r.system.values_mut() {
         e.doc = format!(
             "A `{k}` handle; type `{}:` for its attributes and methods.",
             e.name

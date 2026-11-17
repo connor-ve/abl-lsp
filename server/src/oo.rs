@@ -477,13 +477,7 @@ fn fit(ws: &Workspace, param: &Found, arg: &ArgType) -> u8 {
         },
         (ArgType::Class(p), ArgType::Class(a)) if key(p) == key(a) => 3,
         (ArgType::Class(p), ArgType::Class(_)) if is_object_class(p) => 1,
-        (ArgType::Class(p), ArgType::Class(a)) => {
-            if is_subtype(ws, a, p) {
-                2
-            } else {
-                0
-            }
-        }
+        (ArgType::Class(p), ArgType::Class(a)) if is_subtype(ws, a, p) => 2,
         _ => 0,
     }
 }

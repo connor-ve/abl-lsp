@@ -332,7 +332,7 @@ fn procedure_features() {
         json!({ "textDocument": { "uri": Url::from_file_path(&file).unwrap() } }),
     );
     let data = t["data"].as_array().unwrap();
-    assert!(data.len() > 100 && data.len() % 5 == 0);
+    assert!(data.len() > 100 && data.len().is_multiple_of(5));
 
     // Workspace symbols (index is built in the background)
     let deadline = Instant::now() + Duration::from_secs(10);
@@ -860,7 +860,7 @@ fn apply_inserts(text: &str, edits: &[Value]) -> String {
             )
         })
         .collect();
-    ins.sort_by(|a, b| b.0.cmp(&a.0));
+    ins.sort_by_key(|a| std::cmp::Reverse(a.0));
     let mut out = text.to_string();
     for (start, end, s) in ins {
         out.replace_range(start..end, &s);
