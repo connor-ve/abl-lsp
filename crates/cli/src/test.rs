@@ -104,16 +104,20 @@ fn git_changed(root: &Path) -> Result<Vec<PathBuf>, String> {
         }
         Ok(String::from_utf8_lossy(&out.stdout).to_string())
     };
-    let top = PathBuf::from(run(&["rev-parse", "--show-toplevel"])?.trim());
+    // git names files from the repository's top folder, which it may spell
+    // differently from `root` (a long name for a Windows 8.3 short one, a
+    // junction's target). So take the paths relative to `root` (the prefix is
+    // where root sits in the repository) and join them onto root as given.
+    let prefix = run(&["rev-parse", "--show-prefix"])?.trim().to_string();
     let status = run(&["status", "--porcelain", "--untracked-files=all"])?;
     Ok(status
         .lines()
         .filter(|l| l.len() > 3)
-        .map(|l| {
+        .filter_map(|l| {
             let p = &l[3..];
             // A rename is "old -> new".
             let p = p.rsplit(" -> ").next().unwrap_or(p).trim_matches('"');
-            top.join(p)
+            p.strip_prefix(prefix.as_str()).map(|rel| root.join(rel))
         })
         .collect())
 }

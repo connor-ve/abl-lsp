@@ -3,6 +3,7 @@
 ## 0.8.1 (unreleased)
 
 - Fixed: `.cls` files opened as LaTeX when a LaTeX extension was installed (it claims `.cls` too), with no highlighting, errors or lint. ABL files that open as another language are now switched to ABL (in an abl.toml project always, elsewhere when a `.cls` reads as ABL), with an offer to save that in the workspace settings. The extension also starts in any folder with an abl.toml or ABL files.
+- Fixed: `abl test --changed` found no tests when the project path was spelled differently from git's (a Windows 8.3 short name such as `RUNNER~1`, or a junction).
 - Fixed: the language server failed to start in VS Code (`abl lsp` rejected the `--stdio` flag the client passes).
 - Instant syntax colouring from a TextMate grammar, before the language server starts. It is generated from the server's keyword table.
 - File icons: ABL source files get the procedure icon in themes without their own (icons for `.p`, `.cls`, `.w`, `.i`, `.t` and `.r` are in `media/` for themes that take custom icons).
