@@ -6,11 +6,8 @@ on:
   pull_request:
 
 jobs:
-  server:
+  rust:
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: server
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -18,23 +15,19 @@ jobs:
           toolchain: "1.100.0"
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: server
-      - run: cargo fmt --check
+      - run: cargo fmt --all --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
 
   extension:
     runs-on: windows-latest
-    needs: server
+    needs: rust
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.100.0"
       - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: server
       - uses: actions/setup-node@v4
         with:
           node-version: 20

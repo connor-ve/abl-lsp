@@ -1,0 +1,28 @@
+/* .NET type. Stub written by abl from the public .NET API: common members only, for navigation and completion. .NET types map to ABL ones: String to CHARACTER, Int32 to INTEGER, Boolean to LOGICAL, DateTime to DATETIME. */
+CLASS System.Windows.Forms.Control INHERITS System.Object:
+    DEFINE PUBLIC PROPERTY Name AS CHARACTER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Text AS CHARACTER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Visible AS LOGICAL NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Enabled AS LOGICAL NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Left AS INTEGER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Top AS INTEGER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Width AS INTEGER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Height AS INTEGER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY TabIndex AS INTEGER NO-UNDO GET. SET.
+    DEFINE PUBLIC PROPERTY Parent AS System.Windows.Forms.Control NO-UNDO GET. SET.
+
+    /* Handlers: oButton:Click:Subscribe(OnClick). */
+    DEFINE PUBLIC EVENT Click SIGNATURE VOID (INPUT sender AS System.Object, INPUT e AS System.EventArgs).
+    DEFINE PUBLIC EVENT TextChanged SIGNATURE VOID (INPUT sender AS System.Object, INPUT e AS System.EventArgs).
+    DEFINE PUBLIC EVENT GotFocus SIGNATURE VOID (INPUT sender AS System.Object, INPUT e AS System.EventArgs).
+    DEFINE PUBLIC EVENT LostFocus SIGNATURE VOID (INPUT sender AS System.Object, INPUT e AS System.EventArgs).
+
+    CONSTRUCTOR PUBLIC Control():
+    END CONSTRUCTOR.
+
+    METHOD PUBLIC VOID Show().
+    METHOD PUBLIC VOID Hide().
+    METHOD PUBLIC LOGICAL Focus().
+    METHOD PUBLIC VOID Refresh().
+    METHOD PUBLIC VOID BringToFront().
+END CLASS.

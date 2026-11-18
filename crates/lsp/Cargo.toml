@@ -1,0 +1,16 @@
+[package]
+name = "abl-lsp"
+description = "A language server for OpenEdge ABL"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+abl-core.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tower-lsp.workspace = true
+abl-oe.workspace = true

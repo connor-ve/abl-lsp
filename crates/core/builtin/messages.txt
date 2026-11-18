@@ -1,0 +1,125 @@
+# Common OpenEdge error messages, for `abl explain`.
+#
+# Written by hand from the public OpenEdge documentation and experience, not
+# copied from an installation. The message text is the typical form: wording and
+# placeholders vary between releases. The full set ships with OpenEdge itself.
+#
+# Format: "@<number> <message text>", then the explanation. Lines starting with
+# "fix:" list what to do, "see:" names a related abl lint rule or message.
+
+@26 ** Array subscript <n> is out of range. (26)
+An EXTENT variable or field was indexed with a number below 1 or above its extent.
+fix: Check the index against EXTENT(var) before using it.
+fix: Remember ABL arrays start at 1, not 0.
+
+@74 ** Value <value> cannot be displayed using <format>. (74)
+A value is too large for the display format of a field or variable, for example 12345 with FORMAT ">>>9", or a long string with FORMAT "x(8)" in DISPLAY or STRING(value, format).
+fix: Widen the FORMAT, or use STRING(value) without a format.
+fix: For character data, a FORMAT only limits display: the value itself is not truncated.
+
+@76 ** Invalid character in numeric input <char>. (76)
+A string that is not a number was converted to one: INTEGER("12a"), DECIMAL(""), or input typed into a numeric field.
+fix: Validate the string first, or convert with NO-ERROR and test ERROR-STATUS:ERROR.
+fix: Watch for the session's numeric format (-numsep / -numdec): "1,5" is not a decimal in an American session.
+
+@91 ** No <table> record is available. (91)
+A field of a buffer was used while the buffer holds no record: after a FIND ... NO-ERROR that failed, outside the FOR EACH that filled it, or after the record was released.
+fix: Test IF AVAILABLE <buffer> before using its fields.
+fix: Check that the buffer is scoped where you use it; a FOR EACH releases its record at the end of the block.
+see: find-without-no-error
+
+@132 ** <table> already exists with <field> <value>. (132)
+A CREATE or ASSIGN made a record whose key duplicates an existing one in a UNIQUE index. The check happens when the index fields are assigned or the record is written, not at CREATE.
+fix: FIND the record first and update it, or catch the error and report it.
+fix: Assign all fields of a unique index in one ASSIGN statement, so the index is checked once with the final values.
+
+@138 ** <table> record not on file. (138)
+A FIND (FIND FIRST, FIND ... WHERE, FIND by ROWID) found no matching record and the statement had no NO-ERROR. The block is undone.
+fix: Add NO-ERROR and test IF AVAILABLE <table> afterwards.
+fix: If the record must exist, check the WHERE clause and that the right database is connected.
+see: find-without-no-error
+
+@196 ** <file> Could not understand line <n>. (196)
+A compile error: the compiler stopped understanding the statement on this line. It comes together with a message that says what was wrong (often 247 or 201).
+fix: Read the message that came with it; check the line and the one before it for a missing period, quote or END.
+see: 247
+
+@201 ** Unknown Field or Variable name - <name>. (201)
+A compile error: a name is not a defined variable, a field of any table in scope, or a buffer field.
+fix: Check the spelling and that the DEFINE comes before the first use.
+fix: For a database field, check the database is connected when compiling and the table is in scope (FIND, FOR EACH, DEFINE BUFFER).
+fix: Abbreviated field names must be unambiguous across all tables in scope.
+
+@223 ** Incompatible data types in expression or assignment. (223)
+A compile error: a value of one type was assigned or compared to another, such as a CHARACTER assigned to an INTEGER, or a DATE compared to a string.
+fix: Convert explicitly with INTEGER(), STRING(), DATE(), DECIMAL(), LOGICAL().
+
+@247 ** Unable to understand after -- "<text>". (247)
+A compile error: the statement is not valid ABL from this point on. Common causes are a misspelled keyword, a missing period on the line before, a reserved word used as a name, or a missing comma or THEN.
+fix: Look at the text shown and at the end of the previous statement.
+see: 196
+
+@293 ** "<file>" was not found. (293)
+RUN or a similar statement could not find the procedure: neither the .r nor the source exists on the PROPATH.
+fix: Check the PROPATH of the session (abl env shows the one abl uses) and the file name, including its folder.
+fix: On Linux and Unix, file names are case sensitive.
+
+@396 ** <table> record has NO-LOCK status, update to field not allowed. (396)
+A field was assigned in a record read with NO-LOCK.
+fix: Read the record with EXCLUSIVE-LOCK where you update it, for example FIND CURRENT <table> EXCLUSIVE-LOCK.
+fix: Keep the update in a small transaction block so the lock is held briefly.
+see: find-without-lock
+
+@560 ** Entry <n> is outside the range of list <list>. (560)
+ENTRY(n, list) was called with n below 1 or above the number of entries in the list.
+fix: Test n against NUM-ENTRIES(list, delimiter) first.
+fix: Check the delimiter: ENTRY uses a comma unless told otherwise.
+
+@915 Lock table overflow, increase -L on server (915)
+The database lock table is full. Every record lock (SHARE or EXCLUSIVE) uses an entry until the transaction ends, so one large transaction or many locks held at once fills it.
+fix: Make transactions smaller: commit in batches instead of updating many records in one transaction.
+fix: Read with NO-LOCK where you don't update; FIND and FOR EACH take SHARE-LOCK by default.
+fix: As a last resort, raise -L on the database server.
+see: for-each-without-lock
+
+@1896 ** CRC for <table> does not match CRC in <procedure>. Try recompiling. (1896)
+The r-code was compiled against a different version of the table's schema than the database connected now. Each .r records a CRC per table it uses, and the runtime checks it.
+fix: Recompile the procedure against the current schema.
+fix: Check that the session connects to the same database (and schema version) the code was compiled with.
+
+@2624 <table> in use by <user> on <device>. Wait or choose CANCEL to stop. (2624)
+Another session holds a lock on the record you asked for with EXCLUSIVE-LOCK or SHARE-LOCK, and the request is waiting.
+fix: Add NO-WAIT to the lock and test LOCKED <table> to handle the conflict yourself.
+fix: Look for code that holds locks for a long time, such as user interaction inside a transaction.
+
+@3135 Invalid handle. Not initialized or points to a deleted object. (3135)
+A handle was used before it was set, after the object was deleted, or for something that never existed (for example a BUFFER-FIELD name that doesn't exist).
+fix: Test VALID-HANDLE(h) before using the handle.
+fix: Check where the object is deleted; a handle variable keeps its value after DELETE OBJECT.
+
+@3234 Mismatched number of parameters passed to routine <name>. (3234)
+A RUN passed a different number of parameters than the procedure defines, or with a different mode (INPUT, OUTPUT, INPUT-OUTPUT).
+fix: Compare the RUN statement with the DEFINE PARAMETER statements of the procedure.
+fix: Recompile callers after changing a procedure's parameters.
+
+@4052 **<attribute> is not a queryable attribute for <widget>. (4052)
+An attribute was read from a handle that doesn't have it, often because the handle points at a different kind of object than expected.
+fix: Check the handle's TYPE attribute, and that the handle is the object you think it is.
+
+@4065 **<attribute> is not a setable attribute for <widget>. (4065)
+An attribute that is read-only, or doesn't exist for this kind of object, was assigned.
+fix: Check the attribute in the documentation for this object type, and the handle's TYPE.
+
+@5729 Incompatible datatypes found during runtime conversion. (5729)
+A value of the wrong type was used at runtime, typically with dynamic code: BUFFER-VALUE assignment, a dynamic function call or a parameter passed to a dynamic RUN.
+fix: Convert the value to the field's or parameter's type before passing it.
+
+@6456 Procedure <file> has no entry point for <name>. (6456)
+RUN <name> IN <handle> or a dynamic function call named an internal procedure or function that the running persistent procedure doesn't contain.
+fix: Check the spelling and that the procedure in the handle is the one you expect.
+fix: Make sure the internal procedure is not PRIVATE.
+
+@8812 Lock wait timeout of <n> seconds expired. (8812)
+A lock request waited longer than the -lkwtmo timeout for another session to release the record.
+fix: Find what holds the lock; use NO-WAIT and test LOCKED to fail fast instead of waiting.
+see: 2624

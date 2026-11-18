@@ -1,4 +1,5 @@
-server/target/
+/target/
 client/node_modules/
 client/bin/
 *.vsix
+/dist/

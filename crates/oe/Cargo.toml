@@ -1,0 +1,17 @@
+[package]
+name = "abl-oe"
+description = "Configuration and OpenEdge process driving for the abl tools"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+toml_edit = "0.22"
+
+[dev-dependencies]
+abl-core.workspace = true

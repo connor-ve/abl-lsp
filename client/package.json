@@ -1,7 +1,7 @@
 {
   "name": "abl-lsp",
   "displayName": "ABL Language Server",
-  "description": "OpenEdge ABL outline, go-to-definition, hover, completion, preprocessor, built-in docs, formatting, lint and class checks.",
+  "description": "OpenEdge ABL outline, go-to-definition, hover, completion, preprocessor, built-in docs, formatting, lint and class checks, and a database browser.",
   "version": "0.7.0",
   "publisher": "connor-ve",
   "author": "Connor Van Etten",
@@ -42,6 +42,47 @@
       {
         "command": "abl.restartServer",
         "title": "ABL: Restart Language Server"
+      },
+      {
+        "command": "abl.db.refresh",
+        "title": "Refresh",
+        "category": "ABL",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "abl.db.findTable",
+        "title": "Open Database Table...",
+        "category": "ABL",
+        "icon": "$(search)"
+      },
+      {
+        "command": "abl.db.openSchema",
+        "title": "Open Schema File",
+        "category": "ABL",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "abl.db.create",
+        "title": "Create Database",
+        "category": "ABL",
+        "icon": "$(add)"
+      },
+      {
+        "command": "abl.db.start",
+        "title": "Start Database Server",
+        "category": "ABL",
+        "icon": "$(play)"
+      },
+      {
+        "command": "abl.db.stop",
+        "title": "Stop Database Server",
+        "category": "ABL",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "abl.db.openTable",
+        "title": "Open Table",
+        "category": "ABL"
       }
     ],
     "configuration": {
@@ -236,10 +277,15 @@
           "default": true,
           "description": "Warn when an include file cannot be found on the PROPATH."
         },
+        "abl.compileOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "When a .p, .w, .cls or .t file is saved, check it with the OpenEdge compiler and show its errors. Needs an abl.toml (or global default) naming an OpenEdge install registered with `abl oe add`; without one this does nothing."
+        },
         "abl.serverPath": {
           "type": "string",
           "default": "",
-          "description": "Path to a custom abl-lsp executable. Leave empty to use the bundled server."
+          "description": "Path to a custom `abl` executable, started as `abl lsp`. Leave empty to use the bundled one."
         },
         "abl.trace.server": {
           "type": "string",
@@ -252,7 +298,90 @@
           "description": "Log LSP traffic to the 'ABL Language Server' output channel."
         }
       }
-    }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "abl",
+          "title": "ABL",
+          "icon": "media/database.svg"
+        }
+      ]
+    },
+    "views": {
+      "abl": [
+        {
+          "id": "abl.databases",
+          "name": "Databases",
+          "icon": "media/database.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "abl.db.findTable",
+          "when": "view == abl.databases",
+          "group": "navigation@1"
+        },
+        {
+          "command": "abl.db.refresh",
+          "when": "view == abl.databases",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "abl.db.create",
+          "when": "view == abl.databases && viewItem == db-not-created",
+          "group": "inline"
+        },
+        {
+          "command": "abl.db.start",
+          "when": "view == abl.databases && viewItem == db-stopped",
+          "group": "inline"
+        },
+        {
+          "command": "abl.db.stop",
+          "when": "view == abl.databases && viewItem == db-running",
+          "group": "inline"
+        },
+        {
+          "command": "abl.db.openSchema",
+          "when": "view == abl.databases && viewItem =~ /^db-/",
+          "group": "inline@9"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "abl.db.openTable",
+          "when": "false"
+        },
+        {
+          "command": "abl.db.openSchema",
+          "when": "false"
+        },
+        {
+          "command": "abl.db.create",
+          "when": "false"
+        },
+        {
+          "command": "abl.db.start",
+          "when": "false"
+        },
+        {
+          "command": "abl.db.stop",
+          "when": "false"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "abl.db.findTable",
+        "key": "ctrl+alt+d",
+        "mac": "cmd+alt+d"
+      }
+    ]
   },
   "scripts": {
     "package": "vsce package"

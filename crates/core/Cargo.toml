@@ -1,0 +1,14 @@
+[package]
+name = "abl-core"
+description = "Lexer, preprocessor, parser and analysis for OpenEdge ABL"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+lsp-types.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true

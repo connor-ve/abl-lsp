@@ -1,0 +1,25 @@
+[package]
+name = "abl-cli"
+description = "Command-line tooling for OpenEdge ABL projects"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "abl"
+path = "src/main.rs"
+
+[dependencies]
+abl-core.workspace = true
+abl-lsp.workspace = true
+abl-oe.workspace = true
+clap = { version = "4", features = ["derive"] }
+lsp-types.workspace = true
+serde = { version = "1", features = ["derive"] }
+serde_json = { workspace = true, features = ["preserve_order"] }
+toml = "0.8"
+tokio.workspace = true
+walkdir.workspace = true
