@@ -27,7 +27,7 @@ Editors and agent tools increasingly speak LSP directly. A language that has a g
 **From a release:** download the `.vsix` from [Releases](https://github.com/connor-ve/abl-lsp/releases), then run:
 
 ```powershell
-code --install-extension abl-lsp-0.7.0.vsix
+code --install-extension abl-lsp-0.8.0.vsix
 ```
 
 **With winget** (once it is published; see Releasing below):

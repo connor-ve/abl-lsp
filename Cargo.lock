@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "abl-cli"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "abl-core",
  "abl-lsp",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "abl-core"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "lsp-types",
  "serde_json",
@@ -29,7 +29,7 @@ dependencies = [
 
 [[package]]
 name = "abl-lsp"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "abl-core",
  "abl-oe",
@@ -40,7 +40,7 @@ dependencies = [
 
 [[package]]
 name = "abl-oe"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "abl-core",
  "serde",
