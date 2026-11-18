@@ -1,0 +1,7 @@
+# A project that uses a package from git: the abl-collection library.
+# Get it with `abl i` (it reads [deps] and abl.lock), then open this folder.
+oe = "12.8"
+propath = ["src"]
+
+[deps]
+abl-collection = { git = "https://github.com/connor-ve/abl-collection" }

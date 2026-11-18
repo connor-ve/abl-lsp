@@ -1,4 +1,4 @@
-# ABL Language Server
+# ABL Language Server for OpenEdge
 
 OpenEdge ABL support for VS Code: a fast language server with go-to-definition, hover, completion, rename, lint with quick fixes, formatting and a database browser. It ships with the `abl` command line tool, so the same checks run in the editor, in a terminal and in CI.
 
@@ -52,6 +52,10 @@ A table opens as a page with tabs:
 ### Database schema in the code
 
 With the `.df` files in `abl.toml` (or the `abl.schema` setting), table and field names get go-to-definition into the `.df`, hover with the type, format, label and description, and completion after `customer.`, `buffer.` and `dbname.`. Unqualified field names in a `WHERE` resolve to the table they belong to.
+
+### Compiled r-code
+
+`.r` files can get their own icon. VS Code gives `.r` to the R language by default, so the extension leaves it alone until you opt in: add `"files.associations": { "*.r": "abl-rcode" }` to your workspace settings. With the vscode-icons theme, which picks icons by extension, copy `media/rcode.svg` from the extension to `vsicons-custom-icons/file_type_abl-rcode.svg` next to your user settings, add `"vsicons.associations.files": [{ "icon": "abl-rcode", "extensions": ["r"], "format": "svg" }]`, and run "vscode-icons: Apply Icons Customization". The same works for source files, one entry each: `procedure.svg` for `p`, `class.svg` for `cls`, `window.svg` for `w`, `include.svg` for `i` and `trigger.svg` for `t`, copied as `file_type_abl-<name>.svg` with `"icon": "abl-<name>"`.
 
 ## Getting started
 
@@ -107,6 +111,10 @@ The extension runs the `abl` tool that comes with it. On its own, `abl` also com
 - Include files are read, not inlined: blocks an include opens or closes aren't seen, and code inside an include doesn't know the variables of the file that includes it.
 - The database browser shows the schema from the `.df` files, not from a running database.
 - This is a preview. The parts that run inside OpenEdge (compile on save, reading rows) are tested against a stand-in, not yet across real OpenEdge versions. Please report what you find in the [issues](https://github.com/connor-ve/abl-lsp/issues).
+
+## Developer note
+
+This extension was built without an OpenEdge license, so everything that runs OpenEdge (compile on save, rows in the database browser, and `abl` commands such as `compile`, `run`, `test`, `db` and `pas`) has only been tested against a stand-in, never a real install. Those parts may fail on real OpenEdge. The editor features don't need OpenEdge and work fully. If something breaks, please open an [issue](https://github.com/connor-ve/abl-lsp/issues) with the output.
 
 ## License
 

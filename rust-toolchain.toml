@@ -1,0 +1,4 @@
+[toolchain]
+# The same Rust as CI (.github/workflows/ci.yml), so clippy finds the same things locally.
+channel = "1.100.0"
+components = ["rustfmt", "clippy"]

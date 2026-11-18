@@ -10,7 +10,8 @@
 #   HANDLE:KIND as a type               a handle of that kind (used to type chains)
 #   indented lines                      documentation
 #
-# Written from the OpenEdge documentation; correct entries here as you find gaps.
+# The descriptions are this project's own short summaries. Names, parameters and
+# types follow the documented ABL syntax. Correct entries here as you find gaps.
 
 @functions
 ABSOLUTE(value AS DECIMAL) AS DECIMAL

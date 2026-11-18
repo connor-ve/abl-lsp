@@ -43,7 +43,7 @@ abl i '@code'                        # the VS Code extension that ships with it 
 .\build.ps1 -Install
 ```
 
-Open any folder of `.p`, `.w`, `.i` or `.cls` files. The `samples` folder is a good place to start.
+Open any folder of `.p`, `.w`, `.i` or `.cls` files. The `samples` folder is a good place to start; `samples/packages` shows a project that uses a library from git (run `abl i` there first).
 
 ## Command line
 
@@ -165,7 +165,7 @@ The ABL programs abl runs inside OpenEdge are in `crates/oe/src/driver.rs` and `
 
 Without an `abl.toml`, `lint`, `fmt` and `deps` read `abl.propath`, `abl.lint`, `abl.preprocessor`, `abl.schema` and `abl.format.keywordCase` from `.vscode/settings.json`, so they see the project the way the editor does. An include file is checked the way the project uses it, with the arguments of the first file that includes it. Files keep their encoding when `fmt` or `--fix` rewrites them.
 
-`abl explain` knows 23 common messages. Its table (`crates/core/builtin/messages.txt`) was written by hand from the OpenEdge documentation; the message texts are the typical form, and wording varies between releases. `abl schema diff` compares full dumps. Type and extent changes, and changed indexes, are dropped and re-added, and it warns where that loses data, where a drop and add looks like a rename, and where Progress won't drop a primary index. The delta has no PSC trailer, so it loads with the session's code page.
+`abl explain` knows 23 common messages. Its table (`crates/core/builtin/messages.txt`) has this project's own explanations; only each message's one-line text is quoted, in its typical form, and wording varies between releases. `abl schema diff` compares full dumps. Type and extent changes, and changed indexes, are dropped and re-added, and it warns where that loses data, where a drop and add looks like a rename, and where Progress won't drop a primary index. The delta has no PSC trailer, so it loads with the session's code page.
 
 Configuration has two layers. `~/.abl/config.toml` (or `$ABL_HOME/config.toml`) says which OpenEdge installs this machine has. A project's `abl.toml` names the version it uses, never a path, so the same file works on every machine.
 
@@ -322,6 +322,10 @@ To try a server change without repackaging, point `abl.serverPath` at `target/de
 
 `-Local` needs local manifests allowed once, from an administrator prompt: `winget settings --enable LocalManifestFiles`. To publish: run `.\release.ps1` without `-Local`, attach the zip to a GitHub release tagged `v<version>`, and open a pull request to `microsoft/winget-pkgs` adding the manifests under `manifests\c\connor-ve\abl\<version>\`.
 
+**Grammar.** `build.ps1` also runs `scripts/grammar.js`, which writes `client/syntaxes/abl.tmLanguage.json` from the keyword table in `crates/core/src/keywords.rs`, so a keyword added there is coloured as soon as a file opens.
+
+**Third-party notices.** `build.ps1` runs `scripts/notices.js`, which writes `client/THIRD-PARTY-NOTICES.txt` with the licence of every Rust crate in `abl.exe` and every npm package the extension ships. The file goes into the .vsix and the release zip.
+
 **VS Code Marketplace.** The listing is `client/README.md`, with `client/CHANGELOG.md`, the icon in `client/media/icon.png` and the screenshots in `client/media/screenshots/` (the page loads them from GitHub, so push them first). Once: create the `connor-ve` publisher at marketplace.visualstudio.com/manage, make an Azure DevOps personal access token with the Marketplace (Manage) scope, and run `npx vsce login connor-ve` in `client`. To publish, after `.\build.ps1`, run `npm run publish:marketplace` in `client`. It publishes a Windows x64 build, since the bundled `abl.exe` only runs there. Bump `version` in `client/package.json` (and the crates) for each release.
 
 ## Code map
@@ -374,7 +378,7 @@ The parser works at statement level and deliberately doesn't parse expressions. 
 - **Includes are read, not inlined**: their preprocessor names and their definitions (with the include arguments applied) are known, but blocks that an include opens or closes are not seen, and code *inside* an include that uses variables of the file including it doesn't resolve, so rename doesn't update it. An include opened on its own doesn't know its arguments, so `{1}` stays as written there.
 - **Preprocessor values are expanded as tokens**: a `{&NAME}` that holds half a string or joins two words into one identifier is not reproduced exactly.
 - **Argument types** come from simple expressions; arithmetic other than string concatenation leaves the type unknown, and then the first overload with the right count wins.
-- **Built-in reference** (`abl-reference.txt`) was written from the OpenEdge documentation, not generated from it. It has the common functions and handle members, not all of them; functions with several forms (`DATE`, `DATETIME`) show one signature.
+- **Built-in reference** (`abl-reference.txt`) has this project's own short descriptions, with names and signatures from the documented syntax; nothing is generated from or copied out of the documentation. It has the common functions and handle members, not all of them; functions with several forms (`DATE`, `DATETIME`) show one signature.
 - **Startup procedures on real OpenEdge**: whether `RUN ... PERSISTENT` procedures started from the generated `abl_startup.p` stay alive for the driver (they should: persistent procedures outlive their caller), and how a STOP in one is reported, need a check on a real install.
 - **The database browser reads the schema from `.df` files**, not from a running database, so a database changed by hand (without a new .df) shows its old schema. Related tables are a guess from field names.
 - **Formatting** only changes indentation, trailing white space and (optionally) keyword case. It does not wrap or align.

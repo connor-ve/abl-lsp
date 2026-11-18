@@ -25,7 +25,8 @@ impl Lsp {
 
     fn start_with_home(root: &Path, home: &Path) -> Self {
         let mut child = Command::new(env!("CARGO_BIN_EXE_abl"))
-            .arg("lsp")
+            // As vscode-languageclient starts it: the stdio transport adds --stdio.
+            .args(["lsp", "--stdio"])
             .env("ABL_HOME", home)
             .env_remove("ABL_OE")
             .stdin(Stdio::piped())
@@ -1306,7 +1307,9 @@ fn class_contracts_and_override_rename() {
     }
 
     // Renaming the abstract method renames every override with the same signature.
-    wait_index(&mut lsp, "Broken");
+    // Wait on a file this test never opens: workspace/symbol also answers from
+    // open files, so "Broken" shows up before the background scan is done.
+    wait_index(&mut lsp, "LoadCustomers");
     let shape = oo.join("Shape.cls");
     let shape_text = std::fs::read_to_string(&shape).unwrap();
     let edit = lsp.at_with(

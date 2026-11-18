@@ -262,7 +262,7 @@ fn import_query_export() {
         "big.csv",
     ]);
     assert_eq!(code, 0, "{err}");
-    assert_eq!(err, format!("Exported 2 rows of customer to big.csv\n"));
+    assert_eq!(err, "Exported 2 rows of customer to big.csv\n");
     assert!(p
         .read("big.csv")
         .starts_with("CustNum,Name,Balance,Active,Phone[1],Phone[2]\n1,Lift Line,1200.5"));

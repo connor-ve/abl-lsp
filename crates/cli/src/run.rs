@@ -170,8 +170,8 @@ fn compile_once(cwd: &Path, flag: Option<&str>, jobs: usize) -> Result<String, S
 /// `abl dev fake-dlc DIR`: makes a fake OpenEdge install for trying abl
 /// without OpenEdge, using the fake `_progres` built next to abl.
 /// The database tools the fake install has, besides `_progres`.
-const FAKE_TOOLS: [&str; 8] = [
-    "prodb", "proserve", "proshut", "proutil", "probkup", "prorest", "prodel", "prolib",
+const FAKE_TOOLS: [&str; 9] = [
+    "prodb", "proserve", "proshut", "proutil", "probkup", "prorest", "prodel", "prolib", "pasman",
 ];
 
 pub fn fake_dlc(dir: &Path, release: &str) -> Result<u8, String> {

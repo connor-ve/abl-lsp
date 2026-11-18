@@ -16,6 +16,7 @@ mod install;
 mod lint;
 mod logs;
 mod oe;
+mod pas;
 mod profile;
 mod project;
 mod repl;
@@ -52,7 +53,12 @@ enum Command {
     /// Show the project's configuration (the default command)
     Status,
     /// Run the language server on stdin/stdout (used by the VS Code extension)
-    Lsp,
+    Lsp {
+        /// Talk over stdin/stdout (the only transport; accepted because
+        /// language clients pass it)
+        #[arg(long, hide = true)]
+        stdio: bool,
+    },
     /// Create an abl.toml in the current folder
     Init {
         /// Overwrite an existing abl.toml
@@ -62,7 +68,12 @@ enum Command {
     /// Print the environment abl gives to OpenEdge (DLC, PROPATH, ...)
     Env,
     /// Check the configuration and installs, and say what to fix
-    Doctor,
+    Doctor {
+        /// Fix what has one clear fix first: create missing PROPATH folders,
+        /// add unlisted .df files to abl.toml, register a matching OpenEdge install
+        #[arg(long)]
+        fix: bool,
+    },
     /// Manage the OpenEdge installs this machine knows about
     Oe {
         #[command(subcommand)]
@@ -286,6 +297,11 @@ enum Command {
         #[command(subcommand)]
         command: SchemaCommand,
     },
+    /// A local PASOE instance for the project: create, start, stop
+    Pas {
+        #[command(subcommand)]
+        command: Option<PasCommand>,
+    },
     /// The project's databases: create, start, stop, snapshot, restore
     Db {
         #[command(subcommand)]
@@ -326,6 +342,30 @@ enum Command {
         replace: bool,
         #[arg(long, value_enum)]
         format: Option<data::Format>,
+    },
+}
+
+#[derive(Subcommand)]
+enum PasCommand {
+    /// The instance, whether it runs, and its PROPATH (the default)
+    Status,
+    /// Create the instance with pasman, set up for the project's PROPATH and databases
+    Create {
+        /// Delete an existing instance and make it again
+        #[arg(long)]
+        force: bool,
+    },
+    /// Start the instance (after updating its PROPATH and databases from abl.toml)
+    Start {
+        /// Seconds to wait for it to answer
+        #[arg(long, default_value_t = 120)]
+        wait: u64,
+    },
+    /// Stop the instance
+    Stop {
+        /// Seconds to wait for it to stop
+        #[arg(long, default_value_t = 60)]
+        wait: u64,
     },
 }
 
@@ -481,13 +521,13 @@ fn run(command: Option<Command>, cwd: &Path, flag: Option<&str>) -> Result<u8, S
                 ));
             }
         }
-        Some(Command::Lsp) => {
+        Some(Command::Lsp { .. }) => {
             let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
             rt.block_on(abl_lsp::serve());
         }
         Some(Command::Init { force }) => project::init(cwd, flag, force)?,
         Some(Command::Env) => project::env(cwd, flag)?,
-        Some(Command::Doctor) => return Ok(code(project::doctor(cwd, flag))),
+        Some(Command::Doctor { fix }) => return Ok(code(project::doctor(cwd, flag, fix))),
         Some(Command::Oe { command }) => match command {
             OeCommand::List => oe::list(cwd, flag)?,
             OeCommand::Add { detect: true, .. } => oe::detect()?,
@@ -664,6 +704,12 @@ fn run(command: Option<Command>, cwd: &Path, flag: Option<&str>) -> Result<u8, S
                     exit_code,
                 },
         }) => return schema::diff(&old, &new, delta.as_deref(), exit_code),
+        Some(Command::Pas { command }) => match command.unwrap_or(PasCommand::Status) {
+            PasCommand::Status => pas::status(cwd)?,
+            PasCommand::Create { force } => pas::create(cwd, flag, force)?,
+            PasCommand::Start { wait } => pas::start(cwd, flag, wait)?,
+            PasCommand::Stop { wait } => pas::stop(cwd, flag, wait)?,
+        },
         Some(Command::Db { command }) => {
             use db::Action;
             if let Some(DbCommand::Schema { name, json }) = &command {

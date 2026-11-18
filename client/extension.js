@@ -57,7 +57,54 @@ async function associate(exts) {
   await cfg.update('associations', next, vscode.ConfigurationTarget.Workspace);
 }
 
+// ABL's own extensions. Other languages claim some of them (.cls is also a
+// LaTeX class, .p Pascal, .i SWIG, .t Perl tests), and VS Code then opens
+// the file as that language, so the server never sees it.
+const ABL_EXTS = ['p', 'w', 'i', 'cls', 't'];
+
+// LaTeX classes start with \NeedsTeXFormat, \ProvidesClass, % comments...;
+// ABL classes with USING, CLASS, INTERFACE, ENUM or a /* */ comment.
+function looksLikeAbl(text) {
+  const head = text.slice(0, 4000);
+  if (/^\s*\\[A-Za-z]/m.test(head) && !/^\s*(USING|CLASS|INTERFACE|ENUM)\b/im.test(head)) return false;
+  return /^\s*(USING|CLASS|INTERFACE|ENUM|BLOCK-LEVEL|ROUTINE-LEVEL|\/\*)/im.test(head);
+}
+
+let ablProject; // a promise: does the workspace have an abl.toml?
+let offered = false;
+
+// A file with an ABL extension that opened as another language: open it as
+// ABL instead (in an abl.toml project always, else when it reads as ABL), and
+// offer once to make that the workspace setting.
+async function claim(doc) {
+  if (doc.uri.scheme !== 'file' || doc.languageId === 'abl') return;
+  const ext = path.extname(doc.fileName).slice(1).toLowerCase();
+  if (!ABL_EXTS.includes(ext)) return;
+  const project = await ablProject;
+  if (!project && !(ext === 'cls' && looksLikeAbl(doc.getText()))) return;
+  const other = doc.languageId;
+  await vscode.languages.setTextDocumentLanguage(doc, 'abl');
+  if (offered || !vscode.workspace.workspaceFolders) return;
+  offered = true;
+  const pick = await vscode.window.showInformationMessage(
+    `.${ext} files were opening as ${other} (another extension claims them). Always open .${ext} as ABL in this workspace?`,
+    'Yes',
+    'Not now',
+  );
+  if (pick !== 'Yes') return;
+  const cfg = vscode.workspace.getConfiguration('files');
+  const inspect = cfg.inspect('associations');
+  const next = Object.assign({}, (inspect && inspect.workspaceValue) || {});
+  next[`*.${ext}`] = 'abl';
+  await cfg.update('associations', next, vscode.ConfigurationTarget.Workspace);
+}
+
 async function activate(context) {
+  ablProject = vscode.workspace
+    .findFiles('**/abl.toml', '{**/node_modules/**,**/vendor/**}', 1)
+    .then((f) => f.length > 0, () => false);
+  context.subscriptions.push(vscode.workspace.onDidOpenTextDocument((d) => claim(d)));
+  for (const d of vscode.workspace.textDocuments) claim(d);
   const command = serverCommand(context);
   if (!fs.existsSync(command)) {
     vscode.window.showErrorMessage(`ABL language server not found at ${command}. Set "abl.serverPath" or rebuild the extension.`);

@@ -126,7 +126,7 @@ pub fn detect() -> Result<(), String> {
 
 /// Folders that commonly hold OpenEdge installs. Each one, and each folder
 /// directly inside it, is checked.
-fn default_roots() -> Vec<PathBuf> {
+pub fn default_roots() -> Vec<PathBuf> {
     let mut roots: Vec<PathBuf> = env::var_os("DLC").map(PathBuf::from).into_iter().collect();
     let common: &[&str] = if cfg!(windows) {
         &["C:/Progress", "C:/OpenEdge", "D:/Progress", "D:/OpenEdge"]

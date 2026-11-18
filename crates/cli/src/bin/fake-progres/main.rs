@@ -21,6 +21,7 @@
 //! and `/* fake-crash */` makes the session exit with status 3 at that file.
 
 mod fakedb;
+mod fakepas;
 mod faketest;
 
 use std::env;
@@ -405,6 +406,11 @@ fn main() -> ExitCode {
     if me == "code" {
         println!("fake code: {}", args.join(" "));
         return ExitCode::SUCCESS;
+    }
+    match me.as_str() {
+        "pasman" => return fakepas::pasman(&args),
+        "tcman" => return fakepas::tcman(&args),
+        _ => {}
     }
     if fakedb::TOOLS.contains(&me.as_str()) {
         return fakedb::tool(&me, &args);

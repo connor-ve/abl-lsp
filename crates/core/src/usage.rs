@@ -394,6 +394,6 @@ pub fn find(ws: &Workspace, files: &[(PathBuf, Arc<Analysis>)], target: &Target)
         }
         out.extend(in_file(ws, p, a, target));
     }
-    out.sort_by(|a, b| (a.access, key(&a.path), a.start).cmp(&(b.access, key(&b.path), b.start)));
+    out.sort_by_key(|a| (a.access, key(&a.path), a.start));
     out
 }

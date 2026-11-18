@@ -3,3 +3,4 @@ client/node_modules/
 client/bin/
 *.vsix
 /dist/
+/samples/packages/vendor/

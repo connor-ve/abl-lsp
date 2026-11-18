@@ -22,6 +22,12 @@ try {
         npm install --no-audit --no-fund
         if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
     }
+    # The TextMate grammar (instant colour before the server starts), from the server's keyword table.
+    node "$root\scripts\grammar.js"
+    if ($LASTEXITCODE -ne 0) { throw 'writing the grammar failed' }
+    # The licences of the crates in abl.exe and the npm packages the extension ships.
+    node "$root\scripts\notices.js"
+    if ($LASTEXITCODE -ne 0) { throw 'writing THIRD-PARTY-NOTICES.txt failed' }
     npm run package
     if ($LASTEXITCODE -ne 0) { throw 'vsce package failed' }
     $vsix = Get-ChildItem *.vsix | Sort-Object LastWriteTime | Select-Object -Last 1

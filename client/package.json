@@ -1,6 +1,6 @@
 {
   "name": "abl-lsp",
-  "displayName": "OpenEdge ABL (abl-lsp)",
+  "displayName": "ABL Language Server for OpenEdge",
   "description": "OpenEdge ABL language server: go-to-definition, hover, completion, rename, lint with quick fixes, formatting, compile on save and a database browser.",
   "icon": "media/icon.png",
   "galleryBanner": {
@@ -38,6 +38,11 @@
     "Formatters"
   ],
   "main": "./extension.js",
+  "activationEvents": [
+    "workspaceContains:**/abl.toml",
+    "workspaceContains:**/*.{p,w,cls}",
+    "onLanguage:abl"
+  ],
   "contributes": {
     "languages": [
       {
@@ -53,7 +58,21 @@
           ".cls",
           ".t"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./media/procedure.svg",
+          "dark": "./media/procedure.svg"
+        }
+      },
+      {
+        "id": "abl-rcode",
+        "aliases": [
+          "OpenEdge r-code"
+        ],
+        "icon": {
+          "light": "./media/rcode.svg",
+          "dark": "./media/rcode.svg"
+        }
       }
     ],
     "commands": [
@@ -398,6 +417,13 @@
         "command": "abl.db.findTable",
         "key": "ctrl+alt+d",
         "mac": "cmd+alt+d"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "abl",
+        "scopeName": "source.abl",
+        "path": "./syntaxes/abl.tmLanguage.json"
       }
     ]
   },

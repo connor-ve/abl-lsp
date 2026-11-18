@@ -77,6 +77,37 @@ pub struct Project {
     /// Names defined before every file, like `abl.preprocessor`.
     #[serde(default)]
     pub preprocessor: toml::Table,
+    /// The project's local PASOE instance (`abl pas`).
+    #[serde(default)]
+    pub pas: Pas,
+}
+
+/// `[pas]`: a local PASOE instance for the project. Everything has a default.
+#[derive(Debug, Default, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct Pas {
+    /// Instance name, also its ABL application's. Default: from the project folder's name.
+    pub name: Option<String>,
+    /// The instance folder, relative to the root. Default: `.abl/pas/<name>`.
+    pub path: Option<String>,
+    /// HTTP port. Default 8810; HTTPS is the next port and shutdown the one after.
+    pub port: Option<u16>,
+    pub https_port: Option<u16>,
+    pub shutdown_port: Option<u16>,
+    /// Extra startup parameters for the agents, after the database connections.
+    pub startup: Option<String>,
+}
+
+impl Pas {
+    pub fn http(&self) -> u16 {
+        self.port.unwrap_or(8810)
+    }
+    pub fn https(&self) -> u16 {
+        self.https_port.unwrap_or(self.http().wrapping_add(1))
+    }
+    pub fn shutdown(&self) -> u16 {
+        self.shutdown_port.unwrap_or(self.http().wrapping_add(2))
+    }
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -227,8 +258,9 @@ impl Lock {
 }
 
 /// The PROPATH a package adds, relative to its own root: its abl.toml's
-/// `propath`, else the root itself. Read leniently, so a package written for
-/// a newer abl still works.
+/// `propath`, else `src` when it has one (where ABL repositories usually keep
+/// their code, as `abl init` assumes too), else the root itself. Read
+/// leniently, so a package written for a newer abl still works.
 pub fn package_propath(dir: &Path) -> Vec<String> {
     let entries: Vec<String> = fs::read_to_string(dir.join(PROJECT_FILE))
         .ok()
@@ -241,7 +273,11 @@ pub fn package_propath(dir: &Path) -> Vec<String> {
         })
         .unwrap_or_default();
     if entries.is_empty() {
-        vec![".".into()]
+        if dir.join("src").is_dir() {
+            vec!["src".into()]
+        } else {
+            vec![".".into()]
+        }
     } else {
         entries
     }
@@ -614,6 +650,22 @@ mod tests {
             oe: BTreeMap::new(),
             format: Format::default(),
         }
+    }
+
+    #[test]
+    fn package_propath_defaults() {
+        let dir = std::env::temp_dir().join(format!("abl-pkgpp-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        // Nothing to go on: the root.
+        assert_eq!(package_propath(&dir), ["."]);
+        // A src folder: that.
+        fs::create_dir_all(dir.join("src")).unwrap();
+        assert_eq!(package_propath(&dir), ["src"]);
+        // The package's own abl.toml wins.
+        fs::write(dir.join(PROJECT_FILE), "propath = [\"lib\", \"src\"]\n").unwrap();
+        assert_eq!(package_propath(&dir), ["lib", "src"]);
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]

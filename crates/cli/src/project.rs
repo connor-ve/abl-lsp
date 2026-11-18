@@ -84,12 +84,28 @@ pub fn status(cwd: &Path, flag: Option<&str>) -> Result<bool, String> {
         }) => format!("{version} (from {source}), not installed here"),
     };
     row(&mut out, "oe", &oe);
-    let pp = if p.propath.is_empty() {
-        ". (propath not set)".to_string()
-    } else {
-        p.propath.join(", ")
+    // Where the PROPATH is set (file and line, to open it), then the folders
+    // sessions get in search order: absolute, installed packages included.
+    let set_at = fs::read_to_string(&loaded.file).ok().and_then(|text| {
+        text.lines()
+            .position(|l| l.trim_start().starts_with("propath"))
+            .map(|i| format!("{}:{}", loaded.file.display(), i + 1))
+    });
+    let source = match set_at {
+        Some(at) if !p.propath.is_empty() => format!("set in {at}"),
+        _ => format!(
+            "not set (add `propath = [...]` to {}); using the project folder",
+            loaded.file.display()
+        ),
     };
-    row(&mut out, "propath", &pp);
+    row(&mut out, "propath", &source);
+    for dir in loaded.propath() {
+        let mut entry = dir.display().to_string();
+        if !p.propath.is_empty() && !dir.is_dir() {
+            entry.push_str("  (folder not found)");
+        }
+        row(&mut out, "", &entry);
+    }
     if let Some(o) = &p.output {
         row(&mut out, "output", o);
     }
@@ -204,9 +220,124 @@ impl Report {
     }
 }
 
+/// `abl doctor --fix`: fixes what has one clear fix, saying what it did, before
+/// the checks run. Missing PROPATH folders are created, `.df` files the
+/// project doesn't list are added to abl.toml, and an OpenEdge install of the
+/// needed version (or any, when none is set) is found and registered.
+fn fix(cwd: &Path, flag: Option<&str>) -> usize {
+    let mut fixed = 0;
+    let mut say = |msg: String| {
+        println!("[ fix  ] {msg}");
+        fixed += 1;
+    };
+    let loaded = config::load_project(cwd).ok().flatten();
+    let global = config::load_global().unwrap_or_default();
+
+    // OpenEdge: register an install that matches, found where installs usually are.
+    let wanted = resolve_oe(flag, loaded.as_ref(), &global);
+    let needs_install = match &wanted {
+        None => global.oe.is_empty(),
+        Some(oe) => oe.dlc.is_err(),
+    };
+    if needs_install {
+        let found = crate::oe::detect_in(&crate::oe::default_roots());
+        let pick: Vec<&(String, PathBuf)> = match &wanted {
+            Some(oe) => found.iter().filter(|(v, _)| *v == oe.version).collect(),
+            None => found.iter().collect(),
+        };
+        for (version, dlc) in pick {
+            if global.oe.contains_key(version) {
+                continue;
+            }
+            match config::add_install(version, dlc) {
+                Ok(()) => say(format!("registered OE {version} at {}", dlc.display())),
+                Err(e) => println!("[ warn ] could not register OE {version}: {e}"),
+            }
+        }
+        if wanted.is_none() && global.default.is_none() {
+            if let Some(v) = config::load_global()
+                .ok()
+                .and_then(|g| g.oe.into_keys().next())
+            {
+                if config::set_default(&v).is_ok() {
+                    say(format!("OE {v} is now the global default"));
+                }
+            }
+        }
+    }
+
+    let Some(l) = loaded else {
+        return fixed;
+    };
+    // PROPATH folders that don't exist yet.
+    for entry in &l.project.propath {
+        let dir = l.path(entry);
+        if !dir.exists() {
+            match fs::create_dir_all(&dir) {
+                Ok(()) => say(format!("created propath folder {entry}")),
+                Err(e) => println!("[ warn ] could not create {entry}: {e}"),
+            }
+        }
+    }
+    // Schemas in the project that abl.toml doesn't list.
+    let listed: Vec<PathBuf> = l
+        .project
+        .db
+        .values()
+        .filter_map(|d| d.schema.as_ref())
+        .map(|s| normalize(&l.path(s)))
+        .collect();
+    let mut add = String::new();
+    for (name, rel) in find_schemas(&l.root) {
+        if listed.contains(&normalize(&l.root.join(&rel))) {
+            continue;
+        }
+        if l.project.db.keys().any(|k| k.eq_ignore_ascii_case(&name)) {
+            println!("[ warn ] {rel} not added: a database named {name} is already set");
+            continue;
+        }
+        let _ = write!(add, "\n[db.{name}]\nschema = \"{rel}\"\n");
+        say(format!("added [db.{name}] for {rel} to abl.toml"));
+    }
+    if !add.is_empty() {
+        let mut text = fs::read_to_string(&l.file).unwrap_or_default();
+        if !text.is_empty() && !text.ends_with('\n') {
+            text.push('\n');
+        }
+        text.push_str(&add);
+        if let Err(e) = fs::write(&l.file, text) {
+            println!("[ warn ] could not write {}: {e}", l.file.display());
+        }
+    }
+    fixed
+}
+
+/// A path with `.` and `..` folded and separators unified, for comparing.
+fn normalize(p: &Path) -> PathBuf {
+    let mut out = PathBuf::new();
+    for c in p.components() {
+        match c {
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                out.pop();
+            }
+            c => out.push(c),
+        }
+    }
+    out
+}
+
 /// `abl doctor`: checks the configuration and says what to fix. Returns the
-/// process exit code (1 if anything failed).
-pub fn doctor(cwd: &Path, flag: Option<&str>) -> i32 {
+/// process exit code (1 if anything failed). With `fix`, what can be fixed is
+/// fixed first, and the checks then show the result.
+pub fn doctor(cwd: &Path, flag: Option<&str>, fix_first: bool) -> i32 {
+    if fix_first {
+        let n = fix(cwd, flag);
+        if n == 0 {
+            println!("Nothing to fix automatically.");
+        }
+        println!();
+    }
     let mut r = Report { worst: Level::Ok };
     let global = match (config::global_path(), config::load_global()) {
         (Ok(path), Ok(g)) => {

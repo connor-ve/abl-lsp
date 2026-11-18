@@ -1,0 +1,6 @@
+# Written by `abl install`. Commit it, so every machine gets the same code.
+
+[[package]]
+name = "abl-collection"
+git = "https://github.com/connor-ve/abl-collection"
+commit = "1e576d5e76d405bee1e4788c870e91fbdd99a180"

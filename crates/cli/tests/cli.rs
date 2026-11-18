@@ -181,6 +181,28 @@ fn init_guesses_layout_and_doctor_checks_it() {
 
     let status = sb.ok(&[]);
     assert!(status.contains("sources  1 files"), "{status}");
+    // Where the PROPATH is set, then its folders, absolute, in search order.
+    let sep = std::path::MAIN_SEPARATOR;
+    let file = sb.proj().join("abl.toml").display().to_string();
+    let line = toml.lines().position(|l| l.starts_with("propath")).unwrap() + 1;
+    assert!(
+        status.contains(&format!("propath  set in {file}:{line}\n")),
+        "{status}"
+    );
+    let src = sb.proj().join("src").display().to_string();
+    assert!(status.contains(&format!("         {src}\n")), "{status}");
+    assert!(
+        status.contains(&format!("         {src}{sep}inc\n")),
+        "{status}"
+    );
+    fs::write(
+        sb.proj().join("abl.toml"),
+        toml.replace("\"src/inc\"]", "\"src/inc\", \"lib\"]"),
+    )
+    .unwrap();
+    let status = sb.ok(&[]);
+    assert!(status.contains("lib  (folder not found)"), "{status}");
+    fs::write(sb.proj().join("abl.toml"), &toml).unwrap();
 
     let env = sb.ok(&["env"]);
     let sep = if cfg!(windows) { ";" } else { ":" };
@@ -211,4 +233,60 @@ fn bad_project_file_is_reported() {
     fs::write(sb.proj().join("abl.toml"), "propth = [\"src\"]\n").unwrap();
     let err = sb.fails(&["status"]);
     assert!(err.contains("propth"), "{err}");
+}
+
+#[test]
+fn doctor_fix_repairs_what_it_can() {
+    let sb = Sandbox::new("doctorfix");
+    let dlc = sb.install("OpenEdge128", "12.8.2");
+    fs::create_dir_all(sb.proj().join("db/extra")).unwrap();
+    let df = "ADD TABLE \"item\"\n  AREA \"Data\"\n\nADD FIELD \"name\" OF \"item\" AS character\n  FORMAT \"x(20)\"\n\n.\n";
+    fs::write(sb.proj().join("db/shop.df"), df).unwrap();
+    fs::write(sb.proj().join("db/extra/stock.df"), df).unwrap();
+    fs::write(
+        sb.proj().join("abl.toml"),
+        "oe = \"12.8\"\npropath = [\"src\", \"lib\"]\n\n[db.shop]\nschema = \"db/shop.df\"\n",
+    )
+    .unwrap();
+
+    // Not registered, a propath folder missing, a schema not listed.
+    let before = sb.fails(&["doctor"]);
+    assert!(before.contains("propath lib: folder not found"), "{before}");
+
+    // The install is found where installs usually are ($DLC among them).
+    let out = Command::new(env!("CARGO_BIN_EXE_abl"))
+        .args(["doctor", "--fix"])
+        .current_dir(sb.proj())
+        .env("ABL_HOME", sb.dir.join("home"))
+        .env("DLC", &dlc)
+        .env_remove("ABL_OE")
+        .output()
+        .unwrap();
+    let fixed = text(&out);
+    assert!(out.status.success(), "{fixed}");
+    assert!(fixed.contains("[ fix  ] registered OE 12.8 at"), "{fixed}");
+    assert!(
+        fixed.contains("[ fix  ] created propath folder lib"),
+        "{fixed}"
+    );
+    assert!(
+        fixed.contains("[ fix  ] added [db.stock] for db/extra/stock.df"),
+        "{fixed}"
+    );
+    assert!(fixed.contains("All good."), "{fixed}");
+    assert!(sb.proj().join("lib").is_dir());
+    let toml = fs::read_to_string(sb.proj().join("abl.toml")).unwrap();
+    assert!(
+        toml.ends_with("[db.stock]\nschema = \"db/extra/stock.df\"\n"),
+        "{toml}"
+    );
+    assert!(sb.global_config().contains("12.8"));
+
+    // Run again: nothing left to do, and abl.toml is left as it is.
+    let again = sb.ok(&["doctor", "--fix"]);
+    assert!(again.contains("Nothing to fix automatically."), "{again}");
+    assert_eq!(
+        fs::read_to_string(sb.proj().join("abl.toml")).unwrap(),
+        toml
+    );
 }

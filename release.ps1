@@ -1,5 +1,5 @@
 # Builds a release of abl for winget: a zip with abl.exe and the VS Code
-# extension (.vsix, which `abl i @code` installs), plus the three winget
+# extension (.vsix, which `abl i @code` installs), the licence and the third-party notices, plus the three winget
 # manifest files, validated. Nothing is uploaded or published.
 #
 #   .\release.ps1            dist\abl-<version>-windows-x64.zip and dist\winget\<version>\,
@@ -41,6 +41,7 @@ if (-not $SkipBuild -and -not $Uninstall) {
     Copy-Item (Join-Path $root 'target\release\abl.exe') $stage
     Copy-Item $vsix $stage
     Copy-Item (Join-Path $root 'LICENSE') (Join-Path $stage 'LICENSE.txt')
+    Copy-Item (Join-Path $root 'client\THIRD-PARTY-NOTICES.txt') $stage
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
     Remove-Item $stage -Recurse -Force

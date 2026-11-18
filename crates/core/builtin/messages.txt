@@ -1,7 +1,8 @@
 # Common OpenEdge error messages, for `abl explain`.
 #
-# Written by hand from the public OpenEdge documentation and experience, not
-# copied from an installation. The message text is the typical form: wording and
+# The explanations and fixes are this project's own, written from experience and
+# the public documentation. Only each message's one-line text is quoted, so that
+# `abl explain` recognizes a pasted error; it is the typical form, and wording and
 # placeholders vary between releases. The full set ships with OpenEdge itself.
 #
 # Format: "@<number> <message text>", then the explanation. Lines starting with
