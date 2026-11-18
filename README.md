@@ -322,6 +322,8 @@ To try a server change without repackaging, point `abl.serverPath` at `target/de
 
 `-Local` needs local manifests allowed once, from an administrator prompt: `winget settings --enable LocalManifestFiles`. To publish: run `.\release.ps1` without `-Local`, attach the zip to a GitHub release tagged `v<version>`, and open a pull request to `microsoft/winget-pkgs` adding the manifests under `manifests\c\connor-ve\abl\<version>\`.
 
+**VS Code Marketplace.** The listing is `client/README.md`, with `client/CHANGELOG.md`, the icon in `client/media/icon.png` and the screenshots in `client/media/screenshots/` (the page loads them from GitHub, so push them first). Once: create the `connor-ve` publisher at marketplace.visualstudio.com/manage, make an Azure DevOps personal access token with the Marketplace (Manage) scope, and run `npx vsce login connor-ve` in `client`. To publish, after `.\build.ps1`, run `npm run publish:marketplace` in `client`. It publishes a Windows x64 build, since the bundled `abl.exe` only runs there. Bump `version` in `client/package.json` (and the crates) for each release.
+
 ## Code map
 
 The repository is a Cargo workspace:

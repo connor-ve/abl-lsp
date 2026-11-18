@@ -1,7 +1,23 @@
 {
   "name": "abl-lsp",
-  "displayName": "ABL Language Server",
-  "description": "OpenEdge ABL outline, go-to-definition, hover, completion, preprocessor, built-in docs, formatting, lint and class checks, and a database browser.",
+  "displayName": "OpenEdge ABL (abl-lsp)",
+  "description": "OpenEdge ABL language server: go-to-definition, hover, completion, rename, lint with quick fixes, formatting, compile on save and a database browser.",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#0f2557",
+    "theme": "dark"
+  },
+  "preview": true,
+  "keywords": [
+    "abl",
+    "openedge",
+    "progress",
+    "4gl",
+    "language server",
+    "lsp",
+    "df",
+    "database"
+  ],
   "version": "0.7.0",
   "publisher": "connor-ve",
   "author": "Connor Van Etten",
@@ -17,7 +33,9 @@
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Linters",
+    "Formatters"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -384,7 +402,8 @@
     ]
   },
   "scripts": {
-    "package": "vsce package"
+    "package": "vsce package",
+    "publish:marketplace": "vsce publish --target win32-x64"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
